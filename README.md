@@ -24,12 +24,15 @@ You might wonder why the need for bitset implementations, given that the C++
 standard library provides `std::bitset<N>`. The reason these implementations
 exist is that hardcoding the maximum set size makes for a much faster
 implementation which also more inlineable. I had thought that it might not make
-much difference, but benchmarks show that it does. Consider the particular case
-of `winner_benchmark`, a benchmark program included in this repository.  It
-checks for a winner on 25 different board positions. It is able to do this in
-about 1375 nanoseconds. A variant of the program that uses std::bitset instead
-of the handcrafted bitset implementations requires more than two seconds to do
-the same job (thats 2,000,000+ nanoseconds).
+much difference, but benchmarks show that it does.
+
+Consider the particular case of `winner_benchmark`, a benchmark program
+included in this repository.  It checks for a winner on 25 different board
+positions. It is able to do this in about 1375 nanoseconds. A variant of the
+program that uses std::bitset instead of the handcrafted bitset implementations
+requires more than two seconds to do the same job (that's 2,000,000+
+nanoseconds). You can see the comparison yourself by checking out the branch
+`explore/std-bitset`.
   
 
 Requirements for Building
