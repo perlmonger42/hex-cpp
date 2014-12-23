@@ -20,26 +20,26 @@ The raw data is shown below.
 
 Using quadset:
 
-  | Test                            | Timing        |
-  | :------------------------------ | ------------: |
-  | Benchmark_Winner                |    1298 ns/op |
-  | Benchmark_SimpleVirtualWinner   |    1336 ns/op |
+| Test                            | Timing        |
+| :------------------------------ | ------------: |
+| Benchmark_Winner                |    1298 ns/op |
+| Benchmark_SimpleVirtualWinner   |    1336 ns/op |
 
 
 Using std::bitset:
 
-  | Test                            | Timing        |
-  | :------------------------------ | ------------: |
-  | Benchmark_Winner                | 2204259 ns/op |
-  | Benchmark_SimpleVirtualWinner   | 2151541 ns/op |
+| Test                            | Timing        |
+| :------------------------------ | ------------: |
+| Benchmark_Winner                | 2204259 ns/op |
+| Benchmark_SimpleVirtualWinner   | 2151541 ns/op |
 
 
 An equivalent program written in Go:
 
-  | Test                            | Timing        |
-  | :------------------------------ | ------------: |
-  | Benchmark_Winner                |    6072 ns/op |
-  | Benchmark_SimpleVirtualWinner   |    6725 ns/op |
+| Test                            | Timing        |
+| :------------------------------ | ------------: |
+| Benchmark_Winner                |    6072 ns/op |
+| Benchmark_SimpleVirtualWinner   |    6725 ns/op |
 
 
 Raw Data
