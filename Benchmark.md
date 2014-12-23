@@ -20,18 +20,24 @@ The raw data is shown below.
 
 Using quadset:
 
+  | Test                            | Timing        |
+  | :------------------------------ | ------------: |
   | Benchmark_Winner                |    1298 ns/op |
   | Benchmark_SimpleVirtualWinner   |    1336 ns/op |
 
 
 Using std::bitset:
 
+  | Test                            | Timing        |
+  | :------------------------------ | ------------: |
   | Benchmark_Winner                | 2204259 ns/op |
   | Benchmark_SimpleVirtualWinner   | 2151541 ns/op |
 
 
 An equivalent program written in Go:
 
+  | Test                            | Timing        |
+  | :------------------------------ | ------------: |
   | Benchmark_Winner                |    6072 ns/op |
   | Benchmark_SimpleVirtualWinner   |    6725 ns/op |
 
@@ -39,6 +45,7 @@ An equivalent program written in Go:
 Raw Data
 ========
 
+```bash
   # Using quadsets, winner_benchmark takes less than 1400 nanoseconds:
   $ git rev-parse master
   a2e2373a29bb0c8f20e1f2919d7d9d2f1dfe82fb
@@ -54,9 +61,11 @@ Raw Data
   $ /tmp/hex-build/hex/winner_benchmark
   Benchmark_Winner	1000000	1307 ns/op
   Benchmark_SimpleVirtualWinner	1000000	1338 ns/op
+```
 
 ------------------------------------------------------------------------
 
+```bash
   # Using std::bitset, winner_benchmark takes more than 2 seconds:
   $ git rev-parse explore/std-bitset
   c53ca2c9f13ae8c8d9d76886505f5b727fa97587
@@ -72,9 +81,11 @@ Raw Data
   $ /tmp/hex-build/hex/winner_benchmark
   Benchmark_Winner	1000	2136358 ns/op
   Benchmark_SimpleVirtualWinner	1000	2111961 ns/op
+```
 
 ------------------------------------------------------------------------
 
+```bash
   # An equivalent program in Go:
   $ go test github.com/perlmonger42/hex --bench=.
   PASS
@@ -93,3 +104,4 @@ Raw Data
   Benchmark_Winner	  500000	      6075 ns/op
   Benchmark_SimpleVirtualWinner	  500000	      6720 ns/op
   ok  	github.com/perlmonger42/hex	6.534s
+```
