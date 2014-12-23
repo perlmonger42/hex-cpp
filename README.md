@@ -63,7 +63,7 @@ Setting up the Build
 --------------------
 
 The project uses Google Test. You will need to get a copy of the gtest sources
-(gtest-1.7.0.zip)[https://googletest.googlecode.com/files/gtest-1.7.0.zip] and
+([gtest-1.7.0.zip](https://googletest.googlecode.com/files/gtest-1.7.0.zip)) and
 place a copy of (or a symlink to) its gtest-1.7.0 folder into the root of this
 project. The copy or symlink must have the name `gtest-1.7.0`, or else you must
 edit `./CMakeLists.txt` to reflect the name change.
