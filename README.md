@@ -7,7 +7,7 @@ Overview
 --------
 
 This project contains libraries and programs for studying the game
-of Hex board game.
+of Hex.
 For an introduction to the game, see the
 [wikipedia article](http://en.wikipedia.org/wiki/Hex_%28board_game%29).
 
