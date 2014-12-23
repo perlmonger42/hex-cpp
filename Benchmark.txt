@@ -1,0 +1,49 @@
+Summary
+=======
+
+The values given here are the average of three runs:
+
+Using quadset:
+  Benchmark_Winner                     1298 ns/op 
+  Benchmark_SimpleVirtualWinner        1336 ns/op
+
+
+Using std::bitset:
+  Benchmark_Winner                  2204259 ns/op 
+  Benchmark_SimpleVirtualWinner     2151541 ns/op
+
+
+
+# Using quadsets, winner_benchmark takes less than 1400 nanoseconds:
+$ git rev-parse master
+a2e2373a29bb0c8f20e1f2919d7d9d2f1dfe82fb
+
+$ /tmp/hex-build/hex/winner_benchmark
+Benchmark_Winner	1000000	1282 ns/op
+Benchmark_SimpleVirtualWinner	1000000	1357 ns/op
+
+$ /tmp/hex-build/hex/winner_benchmark
+Benchmark_Winner	1000000	1307 ns/op
+Benchmark_SimpleVirtualWinner	1000000	1315 ns/op
+
+$ /tmp/hex-build/hex/winner_benchmark
+Benchmark_Winner	1000000	1307 ns/op
+Benchmark_SimpleVirtualWinner	1000000	1338 ns/op
+
+
+
+# Using std::bitset, winner_benchmark takes more than 2 seconds:
+$ git rev-parse explore/std-bitset
+c53ca2c9f13ae8c8d9d76886505f5b727fa97587
+
+$ /tmp/hex-build/hex/winner_benchmark
+Benchmark_Winner	1000	2251779 ns/op
+Benchmark_SimpleVirtualWinner	1000	2221055 ns/op
+
+$ /tmp/hex-build/hex/winner_benchmark
+Benchmark_Winner	1000	2224640 ns/op
+Benchmark_SimpleVirtualWinner	1000	2121609 ns/op
+
+$ /tmp/hex-build/hex/winner_benchmark
+Benchmark_Winner	1000	2136358 ns/op
+Benchmark_SimpleVirtualWinner	1000	2111961 ns/op
