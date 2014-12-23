@@ -1,0 +1,10 @@
+
+~/Dropbox/src/C++/hex
+Kepler:thom
+$ git rev-parse explore/std-bitset
+33c5251567b1edfd455287a08a1746142d4aabff
+~/Dropbox/src/C++/hex
+Kepler:thom
+$ /tmp/hex-build/hex/winner_benchmark
+Benchmark_Winner	1000	2256802 ns/op
+Benchmark_SimpleVirtualWinner	1000	2231083 ns/op
