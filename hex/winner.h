@@ -45,8 +45,8 @@ bool Board<N>::horizontalHasWon() const {
 template<bitpos N>
 bool Board<N>::isConnected(CellSet<N> start, CellSet<N> owned, CellSet<N> stop){
   typedef CellSet<N> Set;
-  constexpr Set l = ~Board<N>::leftColumn();
-  constexpr Set r = ~Board<N>::rightColumn();
+  const Set l = ~Board<N>::leftColumn();
+  const Set r = ~Board<N>::rightColumn();
 
   Set startGroup = owned & start;
   Set stopGroup = owned & stop;
@@ -132,8 +132,8 @@ bool Board<N>::isVirtuallyConnected(
     CellSet<N> vacant
 ) {
   typedef CellSet<N> Set;
-  constexpr Set l = ~Board<N>::leftColumn();
-  constexpr Set r = ~Board<N>::rightColumn();
+  const Set l = ~Board<N>::leftColumn();
+  const Set r = ~Board<N>::rightColumn();
 
   Set startGroup = owned & start;
   Set stopGroup = owned & stop;

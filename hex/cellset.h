@@ -1,10 +1,115 @@
 #include <bitset>
 #include <iostream>
 #include <stdint.h>
+#include <string>
 #include <initializer_list>
-#include "../quadset/qset1.h"
-#include "../quadset/qset2.h"
-#include "../quadset/qset3.h"
+//#include "../quadset/qset1.h"
+//#include "../quadset/qset2.h"
+//#include "../quadset/qset3.h"
+
+//==== begin qset/quadset replacement ===
+
+typedef int_fast16_t bitpos;
+
+template<bitpos S, bitpos B = S*S, bitpos Q = (B+63) / 64>
+class qset : public std::bitset<B> {
+public:
+  typedef std::bitset<B> bitset;
+
+  constexpr qset() noexcept : bitset() { }
+  constexpr qset(unsigned long long val) noexcept : bitset(val) { }
+  constexpr qset(const bitset b) : bitset(b) { }
+
+  qset& operator&= (const qset& rhs) noexcept {
+    return this->bitset::operator&= (rhs);
+  }
+  qset& operator|= (const qset& rhs) noexcept {
+    return this->bitset::operator|= (rhs);
+  }
+  qset& operator^= (const qset& rhs) noexcept {
+    return this->bitset::operator^= (rhs);
+  }
+  qset& operator<<= (size_t pos) noexcept {
+    return this->bitset::operator<<= (pos);
+  }
+  qset& operator>>= (size_t pos) noexcept {
+    return this->bitset::operator>>= (pos);
+  }
+  qset operator~() const noexcept {
+    return this->bitset::operator~();
+  }
+  qset operator<<(size_t pos) const noexcept {
+    return this->bitset::operator<< (pos);
+  }
+  qset operator>>(size_t pos) const noexcept {
+    return this->bitset::operator>> (pos);
+  }
+  bool operator== (const qset& rhs) const noexcept {
+    return this->bitset::operator== (rhs);
+  }
+  bool operator!= (const qset& rhs) const noexcept {
+    return this->bitset::operator!= (rhs);
+  }
+  qset operator- (const qset& rhs) const noexcept {
+    return (bitset)(*this) & ~(bitset)rhs;
+  }
+
+  std::ostream& print(std::ostream &out) {
+    out << '{';
+    const int LIMIT = B;
+    bitpos rangeFirst, rangeFinal;
+    std::string comma = "";
+    rangeFirst = rangeFinal = LIMIT + 1; // deliberately out of range
+    for (int i=0; i < LIMIT+1; ++i) {
+      if (i < LIMIT && this->test(i)) {
+        if (i == rangeFinal + 1) {
+          rangeFinal = i;
+        } else {
+          rangeFirst = rangeFinal = i;
+        }
+      } else if (rangeFinal < i) {
+        // Emit rangeFirst..rangeFinal,
+        // but simplify "x..x" to "x", and
+        // simplify "x..x+1" to "x, x+1".
+        out << comma;
+        comma = ", ";
+        if (rangeFinal == rangeFirst) {
+          out << rangeFirst;
+        } else if (rangeFinal == rangeFirst+1) {
+          out << rangeFirst << comma << rangeFinal;
+        } else {
+          out << rangeFirst << ".." << rangeFinal;
+        }
+        rangeFirst = rangeFinal = LIMIT + 1;
+      }
+    }
+    out << '}';
+    return out;
+  }
+
+  std::string to_string() {
+    std::ostringstream stream;
+    this->print(stream);
+    return stream.str();
+  }
+
+};
+
+template<bitpos S, bitpos B = S*S, bitpos Q = (B+63) / 64>
+qset<S,B,Q> operator&(const qset<S,B,Q>& lhs, const qset<S,B,Q>& rhs) noexcept {
+  return (std::bitset<B>)lhs & (std::bitset<B>)rhs;
+}
+
+template<bitpos S, bitpos B = S*S, bitpos Q = (B+63) / 64>
+qset<S,B,Q> operator|(const qset<S,B,Q>& lhs, const qset<S,B,Q>& rhs) noexcept {
+  return (std::bitset<B>)lhs | (std::bitset<B>)rhs;
+}
+
+template<bitpos S, bitpos B = S*S, bitpos Q = (B+63) / 64>
+qset<S,B,Q> operator^(const qset<S,B,Q>& lhs, const qset<S,B,Q>& rhs) noexcept {
+  return (std::bitset<B>)lhs ^ (std::bitset<B>)rhs;
+}
+//==== end qset/quadset replacement ===
 
 template<bitpos S, bitpos B = S*S, bitpos Q = (B+63) / 64>
 class shared_bits {
@@ -44,8 +149,8 @@ public:
   }
 
   static inline constexpr qset<B> neighbors(qset<B> a) {
-    constexpr auto l = ~left();
-    constexpr auto r = ~right();
+    const auto l = ~left();
+    const auto r = ~right();
     return           ( ((a >> (S + 0)))
                      | ((a >> (S - 1)) & l)
                      | ((a >> (0 + 1)) & r)
@@ -100,8 +205,10 @@ public:
   //static constexpr bitpos count = S*S; // The number of cells on an N×N board.
 
 
-  constexpr CellSet() = default;
-  constexpr CellSet(uint64_t val) : bitset{val} { }
+  //constexpr CellSet() = default;
+  constexpr CellSet() : qset<S*S>() { }
+  //constexpr CellSet(uint64_t val) : bitset{val} { }
+  constexpr CellSet(unsigned long long val) : bitset(val) { }
   constexpr CellSet(bitset val) : bitset(val) { }
   // constexpr CellSet() : bitset() { }
   // constexpr CellSet(bitset const &other) : bitset(other) { }
@@ -130,11 +237,11 @@ public:
   }
 
   inline constexpr CellSet<S> operator& (CellSet<S> other) const {
-    return CellSet<S>{ this->bitset::operator&(other) };
+    return CellSet<S>{ (bitset)(*this) & (bitset)(other) };
   }
 
   inline constexpr CellSet<S> operator| (CellSet<S> other) const {
-    return CellSet<S>{ this->bitset::operator|(other) };
+    return CellSet<S>{ (bitset)(*this) | (bitset)(other) };
   }
 
   inline constexpr CellSet<S> operator~ () const {
@@ -232,7 +339,7 @@ public:
   }
 };
 
-static_assert (std::is_pod< CellSet<8> >::value, "CellSet must be POD");
+//static_assert (std::is_pod< CellSet<8> >::value, "CellSet must be POD");
 
 
 template<bitpos S>
