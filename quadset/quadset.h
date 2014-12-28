@@ -14,10 +14,42 @@ inline constexpr uint64_t bit_mask(int m, int n) {
   return (~0ULL >> (63+m-n)) << m;
 }
     
-
-// quadset is a "set of integer" type similar to std::bitset, but instead of
+// quadset is a "set of [0..n]" type similar to std::bitset, but instead of
 // being infinitely variable in size, it is restricted to 256 bits at most.
 //
+// It is intended that quadsets be constexpr constructible, so that
+// methods like left_column() can be evaluated at compile time.
+// constexpr is a feature that was added in C++11. For a function to be
+// constexpr, the following requirements must be met:
+//   1.  The function must have non-void return type. This requirement is
+//       trivially met in the case of a constructor.
+//   2.  The funciton body canot declare variables or define new types.
+//   3.  The body may only contain declarations, null statements, and a single
+//       return statement.
+//   4a. [non-constructor] There must exist argument values such that, after
+//       argument substitution, the expression in the return statement produces
+//       a constant expression.
+//   4b. [constructor] There must exist argument values such that, after
+//       argument substitution, it initializes the class's members with
+//       constant expressions.
+//   5.  [constructor] The destructors for the types must be trivial.
+// Constexpr member functions are implicitly const (relative to ‹this›).
+//
+// C++14 relaxed some of the constexpr constraints.
+//   1.  Declarations are now permitted, except for ‹static› or ‹thread_local›
+//       variables, and variable declarations without intializers.
+//   2.  ‹goto› statements are forbidden.
+//   3.  ‹if› and ‹switch› are permitted.
+//   3.  All looping statements are permitted, including range-based ‹for›.
+//   4.  Expressions may change the value of an object if the lifetime of that
+//       object began within the constant expression function. This includes
+//       calls to any non-‹const› ‹constexpr›-declared non-static member
+//       functions.
+// In C++14, constexpr member functions can be non-‹const› (relative to ‹this›).
+// However, a non-‹const› ‹constexpr› member function can only modify a class
+// member if that object's lifetime began within the constant expression
+// evaluation.
+
 // A quadset inherits from one of four template specializations, having
 // capacities of 1, 2, 3, or 4 quadwords (i.e., 64, 128, 192, or 256 bits).
 //
