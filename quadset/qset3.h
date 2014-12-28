@@ -19,7 +19,6 @@ public:
       "qset<BITS,3>: BITS must be in 129..192");
 
   typedef qset<BITS,3> qSet;
-  typedef qbase<BITS>  qBase;
 
   static inline constexpr qSet make() {
     return qSet{0};
@@ -47,6 +46,10 @@ public:
   //  return result;
   //}
 
+  static constexpr qSet universe() {
+    return qSet{uint64_t(~0ULL), uint64_t(~0ULL), bit_mask(0, BITS-129)};
+  }
+
   constexpr bitpos size() { return BITS; }
   
   // inline constexpr qSet() : b0(0) { }
@@ -65,7 +68,7 @@ public:
 
   // Return true iff all the bits in the set are 1.
   inline constexpr bool all() const {
-    return this->operator==(qBase::universe());
+    return this->operator==(universe());
   }
 
   // Return the number of elements in the set.
@@ -166,7 +169,7 @@ public:
   }
 
   inline constexpr qSet operator~ () const {
-    return *this ^ qBase::universe();
+    return *this ^ universe();
   }
 
   // MUST NOT IMPLEMENT operator=, or qset won't be POD.
@@ -269,7 +272,7 @@ public:
 
   // Set all bits.
   inline qSet& set() {
-    *this = qBase::universe();
+    *this = universe();
     return *this;
   }
 
@@ -454,12 +457,12 @@ public:
 
   // Print a representation of the set; for example: {1, 3..5, 8, 10, 12}
   std::ostream& print(std::ostream &out) {
-    return qBase::print(out, *this);
+    return ::print(out, *this);
   }
 
   // Return a string representation of the set; for example: {1, 3..5, 8, 12}
   std::string to_string() const {
-    return qBase::to_string(*this);
+    return ::to_string(*this);
   }
 
 };

@@ -18,7 +18,6 @@ public:
       "qset<BITS,2>: BITS must be in 65..128");
 
   typedef qset<BITS,2> qSet;
-  typedef qbase<BITS>  qBase;
 
   static inline constexpr qSet make() {
     return qSet{0};
@@ -45,6 +44,10 @@ public:
   //  }
   //  return result;
   //}
+ 
+  static constexpr qSet universe() {
+    return qSet{uint64_t(~0ULL), bit_mask(0, BITS-65)};
+  }
 
   constexpr bitpos size() { return BITS; }
   
@@ -64,7 +67,7 @@ public:
 
   // Return true iff all the bits in the set are 1.
   inline constexpr bool all() const {
-    return this->operator==(qBase::universe());
+    return this->operator==(universe());
   }
 
   // Return the number of elements in the set.
@@ -150,7 +153,7 @@ public:
   }
 
   inline constexpr qSet operator~ () const {
-    return *this ^ qBase::universe();
+    return *this ^ universe();
   }
 
   // MUST NOT IMPLEMENT operator=, or qset won't be POD.
@@ -160,7 +163,7 @@ public:
   //   return *this;
   // }
 
-  inline qSet& operator<<=(bitpos n) {
+  inline constexpr qSet& operator<<=(bitpos n) {
     if (n < 0) {
       throw std::out_of_range("qset.operator<<=(): negative shift");
     } else if (n == 0) {
@@ -180,7 +183,7 @@ public:
     return *this;
   }
 
-  inline qSet& operator>>=(bitpos n) {
+  inline constexpr qSet& operator>>=(bitpos n) {
     if (n < 0) {
       throw std::out_of_range("qset.operator>>=(): negative shift");
     } else if (n == 0) {
@@ -200,39 +203,39 @@ public:
     return *this;
   }
 
-  inline qSet& operator&= (qSet other) {
+  inline constexpr qSet& operator&= (qSet other) {
     b0 &= other.b0;
     b1 &= other.b1;
     return *this;
   }
 
-  inline qSet& operator|= (qSet other) {
+  inline constexpr qSet& operator|= (qSet other) {
     b0 |= other.b0;
     b1 |= other.b1;
     return *this;
   }
 
-  inline qSet& operator^= (qSet other) {
+  inline constexpr qSet& operator^= (qSet other) {
     b0 ^= other.b0;
     b1 ^= other.b1;
     return *this;
   }
 
   // Removes from this set any elements in other.
-  inline qSet& operator-= (qSet other) {
+  inline constexpr qSet& operator-= (qSet other) {
     b0 &= ~other.b0;
     b1 &= ~other.b1;
     return *this;
   }
 
   // Set all bits.
-  inline qSet& set() {
-    *this = qBase::universe();
+  inline constexpr qSet& set() {
+    *this = universe();
     return *this;
   }
 
   // Set the indicated bit.
-  inline qSet& set(bitpos pos) {
+  inline constexpr qSet& set(bitpos pos) {
     switch (pos >> 6) {
       case  0: b0 |= 1ULL << (pos -  0); break;
       case  1: b1 |= 1ULL << (pos & 0x3F); break;
@@ -242,7 +245,7 @@ public:
   }
 
   // Set the range of bits [m..n-1].
-  inline qSet& set(bitpos m, bitpos n) {
+  inline constexpr qSet& set(bitpos m, bitpos n) {
     if (m == n) {
       return *this;
     }
@@ -268,7 +271,7 @@ public:
   }
 
   // Set bits a, b, c, ....
-  inline qSet& set(std::initializer_list<bitpos> list) {
+  inline constexpr qSet& set(std::initializer_list<bitpos> list) {
     for (bitpos i : list) {
       this->set(i);
     }
@@ -276,14 +279,14 @@ public:
   }
 
   // Clear all the bits.
-  inline qSet& reset() {
+  inline constexpr qSet& reset() {
     b0 = 0;
     b1 = 0;
     return *this;
   }
 
   // Clear the indicated bit.
-  inline qSet& reset(bitpos pos) {
+  inline constexpr qSet& reset(bitpos pos) {
     switch (pos >> 6) {
       case  0: b0 &= ~(1ULL << (pos -  0)); break;
       case  1: b1 &= ~(1ULL << (pos & 0x3F)); break;
@@ -293,7 +296,7 @@ public:
   }
 
   // Clear the range of bits [m..n-1].
-  inline qSet& reset(bitpos m, bitpos n) {
+  inline constexpr qSet& reset(bitpos m, bitpos n) {
     if (m == n) {
       return *this;
     }
@@ -319,7 +322,7 @@ public:
   }
 
   // Clear bits a, b, c, ....
-  inline qSet& flip(std::initializer_list<bitpos> list) {
+  inline constexpr qSet& flip(std::initializer_list<bitpos> list) {
     for (bitpos i : list) {
       this->flip(i);
     }
@@ -327,14 +330,14 @@ public:
   }
 
   // Toggle all the bits.
-  inline qSet& flip() {
+  inline constexpr qSet& flip() {
     b0 = ~b0;
     b1 = ~b1;
     return *this;
   }
 
   // Toggle the indicated bit.
-  inline qSet& flip(bitpos pos) {
+  inline constexpr qSet& flip(bitpos pos) {
     switch (pos >> 6) {
       case  0: b0 ^= (1ULL << (pos -  0)); break;
       case  1: b1 ^= (1ULL << (pos & 0x3F)); break;
@@ -344,7 +347,7 @@ public:
   }
 
   // Toggle the range of bits [m..n-1].
-  inline qSet& flip(bitpos m, bitpos n) {
+  inline constexpr qSet& flip(bitpos m, bitpos n) {
     if (m == n) {
       return *this;
     }
@@ -371,12 +374,12 @@ public:
 
   // Print a representation of the set; for example: {1, 3..5, 8, 10, 12}
   std::ostream& print(std::ostream &out) {
-    return qBase::print(out, *this);
+    return ::print(out, *this);
   }
 
   // Return a string representation of the set; for example: {1, 3..5, 8, 12}
   std::string to_string() const {
-    return qBase::to_string(*this);
+    return ::to_string(*this);
   }
 
 };
