@@ -30,8 +30,8 @@ TEST(BoardConstruction, BoardDefaultConstructor) {
 
 // Tests content constructor for Board.
 TEST(BoardConstruction, BoardContentConstructor) {
-  //auto all = CellSet<1>::elements({0});
-  //auto nil = CellSet<1>::elements({});
+  //auto all = CellSet<1>::make({0});
+  //auto nil = CellSet<1>::make({});
   CellSet<1> all, nil;
   all.clear().set(0);
   nil.clear();
@@ -86,7 +86,7 @@ TEST(BoardConstruction, BoardContentConstructor) {
     x.clear().set(6).set(11).set(12);
     o.clear().set(9).set(15);
     e.clear().set(6).set(9).set(11).set(12).set(15);
-    n = CellSet<4>::elements({0,1,2,3,4,5,7,8,10,13,14});
+    n = CellSet<4>::make({0,1,2,3,4,5,7,8,10,13,14});
     EXPECT_EQ('O', sample4.player());
     EXPECT_EQ('X', sample4.opponent());
     EXPECT_EQ(x, sample4.verticalCells());
@@ -94,12 +94,12 @@ TEST(BoardConstruction, BoardContentConstructor) {
     EXPECT_EQ(e, sample4.occupiedCells());
     EXPECT_EQ(n, sample4.emptyCells());
 
-    EXPECT_EQ(CellSet<4>::elements({0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}),
+    EXPECT_EQ(CellSet<4>::make({0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}),
               sample4.allCells());
-    EXPECT_EQ(CellSet<4>::elements({0,1,2,3}), sample4.topRow());
-    EXPECT_EQ(CellSet<4>::elements({12,13,14,15}), sample4.bottomRow());
-    EXPECT_EQ(CellSet<4>::elements({0,4,8,12}), sample4.leftColumn());
-    EXPECT_EQ(CellSet<4>::elements({3,7,11,15}), sample4.rightColumn());
+    EXPECT_EQ(CellSet<4>::make({0,1,2,3}), sample4.topRow());
+    EXPECT_EQ(CellSet<4>::make({12,13,14,15}), sample4.bottomRow());
+    EXPECT_EQ(CellSet<4>::make({0,4,8,12}), sample4.leftColumn());
+    EXPECT_EQ(CellSet<4>::make({3,7,11,15}), sample4.rightColumn());
 
     EXPECT_EQ("O:------X--O-XX--O", sample4.stateString());
     EXPECT_EQ("O:O--XX-O--X------", sample4.reverseStateString());
@@ -145,8 +145,8 @@ TEST(BoardState, BoardPrinting) {
     std::ostringstream stream;
     stream << std::endl;
     Board<6>::MappedRender(stream, "      ", {
-      { 'O', CellSet<6>::elements({ 1, 2, 3, 4, 7, 8, 9, 13 }) },
-      { '*', CellSet<6>::elements({ 14 }) },
+      { 'O', CellSet<6>::make({ 1, 2, 3, 4, 7, 8, 9, 13 }) },
+      { '*', CellSet<6>::make({ 14 }) },
     });
     std::string expected = R"(
         a b c d e f

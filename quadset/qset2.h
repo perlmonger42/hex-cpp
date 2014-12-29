@@ -30,6 +30,15 @@ public:
     return pSet | make(args...);
   }
 
+  static constexpr qSet make(std::initializer_list<bitpos> list) {
+    qSet result;
+    result.reset();
+    for (int i : list) {
+      result.set(i);
+    }
+    return result;
+  }
+
   static inline constexpr qSet range(bitpos m, bitpos n) {
     qSet result = {0};
     result.set(m, n);
@@ -374,7 +383,7 @@ public:
 
   // Print a representation of the set; for example: {1, 3..5, 8, 10, 12}
   std::ostream& print(std::ostream &out) {
-    return ::print(out, *this);
+    return out << *this;
   }
 
   // Return a string representation of the set; for example: {1, 3..5, 8, 12}

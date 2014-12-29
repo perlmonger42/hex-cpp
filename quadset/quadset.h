@@ -58,6 +58,19 @@ inline constexpr uint64_t bit_mask(int m, int n) {
 template<bitpos BITS, bitpos QUADWORDS = (BITS+63) / 64>
 class qset;
 
+// Forward declaration of ostream insertion function.
+template<bitpos BITS>
+std::ostream& operator<<(std::ostream &out, qset<BITS> set);
+
+// Forward declaration of to_string() function.
+template<bitpos BITS>
+std::string to_string(qset<BITS> set);
+
+
+#include "../quadset/qset1.h"
+#include "../quadset/qset2.h"
+#include "../quadset/qset3.h"
+
 
 // quadset<BITS> is a subclass of the right-sized specialization.
 // This is almost all it has to be, since all the real work is done in
@@ -73,24 +86,167 @@ public:
   typedef quadset<BITS> quadSet;
   typedef qset<BITS>    qSet;
 
-  static constexpr quadSet mk(qSet set) {
-    return * (quadSet*) &set;
-  }
+  constexpr quadset() { qSet::reset(); }
+  constexpr quadset(uint64_t val) : qSet{val} { }
+  constexpr quadset(qSet val) : qSet(val) { }
 
   static constexpr quadSet make() {
-    return mk(qSet::make());
+    return quadSet{ qSet::make() };
   }
 
   template<typename... Args>
   static constexpr quadSet make(bitpos p, Args... args) {
-    return mk(qSet::make(p, args...));
+    return quadSet{ qSet::make(p, args...) };
   }
 
+  static quadSet make(std::initializer_list<bitpos> list) {
+    return quadSet{ qSet::make(list) };
+  }
+
+  static constexpr quadSet range(bitpos m, bitpos n) {
+    return quadSet{ qSet::range(m, n) };
+  }
+
+  static inline constexpr quadSet repeat_block(
+    quadSet block,
+    bitpos  blockSize,
+    bitpos  count,
+    quadSet accumulator = quadSet{ 0 }
+  ) {
+    return count == 0 ? accumulator :
+      repeat_block(block, blockSize, count-1, (accumulator<<blockSize) | block);
+  }
+
+  static constexpr quadSet universe() {
+    return quadSet{ qSet::universe() };
+  }
+
+  constexpr uint64_t to_ullong() const {
+    return this->qSet::to_ullong();
+  }
+
+  constexpr quadSet operator<<(bitpos n) const {
+    return quadSet{ this->qSet::operator<<(n) };
+  }
+
+  constexpr quadSet operator>>(bitpos n) const {
+    return quadSet{ this->qSet::operator>>(n) };
+  }
+
+  constexpr quadSet operator& (quadSet other) const {
+    return quadSet{ this->qSet::operator& (other) };
+  }
+
+  constexpr quadSet operator| (quadSet other) const {
+    return quadSet{ this->qSet::operator| (other) };
+  }
+
+  constexpr quadSet operator^ (quadSet other) const {
+    return quadSet{ this->qSet::operator^ (other) };
+  }
+
+  constexpr quadSet operator- (quadSet other) const {
+    return quadSet{ this->qSet::operator- (other) };
+  }
+
+  constexpr quadSet operator- () const {
+    return quadSet{ this->qSet::operator- () };
+  }
+
+  constexpr quadSet& operator<<= (bitpos n) {
+    this->qSet::operator<<=(n);
+    return *this;
+  }
+
+  constexpr quadSet& operator>>= (bitpos n) {
+    this->qSet::operator>>=(n);
+    return *this;
+  }
+
+  constexpr quadSet& operator&= (quadSet other) {
+    this->qSet::operator&= (other);
+    return *this;
+  }
+
+  constexpr quadSet& operator|= (quadSet other) {
+    this->qSet::operator|= (other);
+    return *this;
+  }
+
+  constexpr quadSet& operator^= (quadSet other) {
+    this->qSet::operator^= (other);
+    return *this;
+  }
+
+  constexpr quadSet& operator-= (quadSet other) {
+    this->qSet::operator-= (other);
+    return *this;
+  }
+
+  constexpr quadSet& set() {
+    this->qSet::set();
+    return *this;
+  }
+
+  constexpr quadSet& set(bitpos pos) {
+    this->qSet::set(pos);
+    return *this;
+  }
+
+  constexpr quadSet& set(bitpos m, bitpos n) {
+    this->qSet::set(m, n);
+    return *this;
+  }
+
+  constexpr quadSet& set(std::initializer_list<bitpos> list) {
+    this->qSet::set(list);
+    return *this;
+  }
+
+  constexpr quadSet& reset() {
+    this->qSet::reset();
+    return *this;
+  }
+
+  constexpr quadSet& reset(bitpos pos) {
+    this->qSet::reset(pos);
+    return *this;
+  }
+
+  constexpr quadSet& reset(bitpos m, bitpos n) {
+    this->qSet::reset(m, n);
+    return *this;
+  }
+
+  constexpr quadSet& reset(std::initializer_list<bitpos> list) {
+    this->qSet::set(list);
+    return *this;
+  }
+
+  constexpr quadSet& flip() {
+    this->qSet::flip();
+    return *this;
+  }
+
+  constexpr quadSet& flip(bitpos pos) {
+    this->qSet::flip(pos);
+    return *this;
+  }
+
+  constexpr quadSet& flip(bitpos m, bitpos n) {
+    this->qSet::flip(m, n);
+    return *this;
+  }
+
+  constexpr quadSet& flip(std::initializer_list<bitpos> list) {
+    this->qSet::flip(list);
+    return *this;
+  }
 };
 
 
 template<bitpos BITS>
-std::ostream& print(std::ostream &out, qset<BITS> set) {
+std::ostream& operator<<(std::ostream &out, qset<BITS> set) {
   out << '{';
   bitpos rangeFirst, rangeFinal;
   std::string comma = "";
@@ -128,15 +284,5 @@ std::string to_string(qset<BITS> set) {
   set.print(stream);
   return stream.str();
 }
-
-//template<int BITS>
-//qset<BITS> set(std::initializer_list<bitpos> list) {
-//  qset<BITS> result;
-//  result.clear();
-//  for (int i : list) {
-//    result.set(i);
-//  }
-//  return result;
-//}
 
 #endif /* __QUADSET_H__ */

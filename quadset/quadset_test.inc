@@ -5,9 +5,17 @@
 // The test case name and the test name should both be valid C++
 // identifiers.  And you should not use underscore (_) in the names.
 
-TEST(SET, size) {
+TEST(SET, statics) {
   SET s;
+
+  // size()
   EXPECT_EQ(s.size(), SIZE);
+
+  // universe()
+  std::stringstream stream;
+  stream << "{0.." << s.size()-1 << '}';
+  auto want = stream.str();
+  EXPECT_EQ(want, SET::universe().to_string());
 }
 
 TEST(SET, to_string) {
