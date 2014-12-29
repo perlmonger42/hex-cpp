@@ -20,6 +20,9 @@ typedef qset<129> set129;
 typedef qset<160> set160;
 typedef qset<191> set191;
 typedef qset<192> set192;
+typedef quadset<64> qs64;
+typedef quadset<128> qs128;
+typedef quadset<192> qs192;
 
 
 template<bitpos BITS>
@@ -249,6 +252,24 @@ void testShift(std::string label, qset<BITS> got, qset<BITS> base, bitpos shift)
 #undef SIZE
 
 #define SET set192
+#define SIZE 192
+#include "quadset_test.inc"
+#undef SET
+#undef SIZE
+
+#define SET qs64
+#define SIZE 64
+#include "quadset_test.inc"
+#undef SET
+#undef SIZE
+
+#define SET qs128
+#define SIZE 128
+#include "quadset_test.inc"
+#undef SET
+#undef SIZE
+
+#define SET qs192
 #define SIZE 192
 #include "quadset_test.inc"
 #undef SET

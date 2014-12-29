@@ -59,21 +59,34 @@ template<bitpos BITS, bitpos QUADWORDS = (BITS+63) / 64>
 class qset;
 
 
-//  // quadset<BITS> is simply a subclass of the right-sized specialization.
-//  // This is the complete implementation of the class, as nothing else is needed.
-//  // All the real work is done in qset<BITS,QUADWORDS>.
-//  template<bitpos BITS>
-//  class quadset : public qset<BITS> {
-//  public:
-//    static inline constexpr bitpos size() { return BITS; }
-//  
-//    static inline constexpr quadset<BITS> range(bitpos m, bitpos n) {
-//      quadset<BITS> result = {0};
-//      result.set(m, n);
-//      return result;
-//    }
-//  
-//  };
+// quadset<BITS> is a subclass of the right-sized specialization.
+// This is almost all it has to be, since all the real work is done in
+// qset<BITS,QUADWORDS>.
+// Unfortunately, it's not that simple, because the result type of all the
+// operators would be wrong (for example, quadset<70>::operator| returns a
+// value of type qset<70,2> instead of quadset<70>). In consequence,
+// quadset<BITS> has to provide a bunch of wrappers that adjust the type.
+template<bitpos BITS>
+class quadset : public qset<BITS> {
+public:
+
+  typedef quadset<BITS> quadSet;
+  typedef qset<BITS>    qSet;
+
+  static constexpr quadSet mk(qSet set) {
+    return * (quadSet*) &set;
+  }
+
+  static constexpr quadSet make() {
+    return mk(qSet::make());
+  }
+
+  template<typename... Args>
+  static constexpr quadSet make(bitpos p, Args... args) {
+    return mk(qSet::make(p, args...));
+  }
+
+};
 
 
 template<bitpos BITS>

@@ -1,7 +1,8 @@
 
 It is intended that quadsets be constexpr constructible, so that methods like
-left_column() can be evaluated at compile time. The constexpr feature was added
-in C++11.
+left\_column() can be evaluated at compile time.
+
+The constexpr feature was added in C++11.
 
 CONSTEXPR
 =========
@@ -84,3 +85,5 @@ A class type may be aggregate initialized only if it has
   3. No base classes.
   4. No virtual members.
   5. No brace-or-equal initializers for non-static members (until C++14).
+
+<!-- Vim: set ft=markdown: -->
