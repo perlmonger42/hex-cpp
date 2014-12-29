@@ -18,6 +18,10 @@ public:
 
   typedef qset<BITS,1> qSet;
 
+  static inline constexpr qSet from_ullong(uint64_t val) {
+    return qSet{val};
+  }
+
   static inline constexpr qSet make() {
     return qSet{0};
   }

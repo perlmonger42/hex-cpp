@@ -90,6 +90,10 @@ public:
   constexpr quadset(uint64_t val) : qSet{val} { }
   constexpr quadset(qSet val) : qSet(val) { }
 
+  static constexpr quadSet from_ullong(uint64_t val) {
+    return quadSet{ qSet::from_ullong(val) };
+  }
+
   static constexpr quadSet make() {
     return quadSet{ qSet::make() };
   }
@@ -219,7 +223,7 @@ public:
   }
 
   constexpr quadSet& reset(std::initializer_list<bitpos> list) {
-    this->qSet::set(list);
+    this->qSet::reset(list);
     return *this;
   }
 

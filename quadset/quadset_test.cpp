@@ -5,34 +5,45 @@
 #include <functional>
 #include <vector>
 #include "quadset.h"
-#include "qset1.h"
-#include "qset2.h"
-#include "qset3.h"
 #include "gtest/gtest.h"
 
-typedef qset<63> set63;
-typedef qset<64> set64;
-typedef qset<65> set65;
-typedef qset<96> set96;
-typedef qset<127> set127;
-typedef qset<128> set128;
-typedef qset<129> set129;
-typedef qset<160> set160;
-typedef qset<191> set191;
-typedef qset<192> set192;
-typedef quadset<64> qs64;
-typedef quadset<128> qs128;
-typedef quadset<192> qs192;
+typedef quadset<63> set63;
+typedef quadset<64> set64;
+typedef quadset<65> set65;
+typedef quadset<96> set96;
+typedef quadset<127> set127;
+typedef quadset<128> set128;
+typedef quadset<129> set129;
+typedef quadset<160> set160;
+typedef quadset<191> set191;
+typedef quadset<192> set192;
 
 
 template<bitpos BITS>
 void expect_eq_set(
     std::string label,
     std::bitset<BITS> bset,
-    qset<BITS> qset
+    quadset<BITS> quad
 ) {
   for (bitpos i = 0; i < BITS; ++i) {
-    EXPECT_EQ((bset.test(i)?1000:0)+i, (qset.test(i)?1000:0)+i) << label;
+    EXPECT_EQ((bset.test(i)?1000:0)+i, (quad.test(i)?1000:0)+i) << label;
+  }
+}
+
+template<bitpos BITS>
+void expect_op_result(
+    std::string op,
+    std::bitset<BITS> bits,
+    quadset<BITS> q1,
+    quadset<BITS> q2,
+    quadset<BITS> quad
+) {
+  for (bitpos i = 0; i < BITS; ++i) {
+    if (bits.test(i) != quad.test(i)) {
+      EXPECT_EQ(false, true) << q1.to_string() << ' ' << op << ' '
+        << q2.to_string() << " = " << quad.to_string()
+        << "; expected " << bits;
+    }
   }
 }
 
@@ -61,46 +72,52 @@ constexpr int N_SMALL_PRIMES = sizeof(smallPrimes)/sizeof(int);
 constexpr int LARGEST_TESTABLE_PRIME = smallPrimes[N_SMALL_PRIMES-1];
 
 
+template<bitpos BITS>
+struct SampleSets {
+  std::vector< quadset<BITS>     > quadsets;
+  std::vector< std::bitset<BITS> > bitsets;
+};
+
+
 // includePrimeSets() adds two sets to samples[], containing respectively
 // all the prime numbers and all the conjugates in the range 0..BITS-1.
 template<bitpos BITS>
-void includePrimeSets(std::vector< qset<BITS> > &samples) {
+void includePrimeSets(SampleSets<BITS> &samples) {
 
   static_assert (BITS <= LARGEST_TESTABLE_PRIME, "can't check primes that big");
 
-  qset<BITS> primeSet, conjugateSet;
-  std::bitset<BITS> primeBits, conjugateBits;
+  quadset<BITS> primeSet, compositeSet;
+  std::bitset<BITS> primeBits, compositeBits;
 
   primeSet.reset();
-  conjugateSet.set();
+  compositeSet.set();
   primeBits.reset();
-  conjugateBits.set();
+  compositeBits.set();
 
   for (int i = 0; i < N_SMALL_PRIMES && smallPrimes[i] < BITS; ++i) {
     primeSet.set(smallPrimes[i]);
-    conjugateSet.reset(smallPrimes[i]);
+    compositeSet.reset(smallPrimes[i]);
     primeBits.set(smallPrimes[i]);
-    conjugateBits.reset(smallPrimes[i]);
+    compositeBits.reset(smallPrimes[i]);
   }
   expect_eq_set<BITS>("primes", primeBits, primeSet);
-  expect_eq_set<BITS>("conjugates", conjugateBits, conjugateSet);
+  expect_eq_set<BITS>("composites", compositeBits, compositeSet);
 
-  EXPECT_EQ(~primeSet, conjugateSet);
-  EXPECT_EQ(~conjugateSet, primeSet);
-  samples.push_back(primeSet);
-  samples.push_back(conjugateSet);
+  EXPECT_EQ(~primeSet, compositeSet);
+  EXPECT_EQ(~compositeSet, primeSet);
+  samples.quadsets.push_back(primeSet);
+  samples.quadsets.push_back(compositeSet);
+  samples.bitsets.push_back(primeBits);
+  samples.bitsets.push_back(compositeBits);
 }
 
 // includeAlternatingBitGroups adds two Sets to samples[]; the first
 // is a bitset of the form 11001100... and the second is of the form
 // 0011001100 -- where the length of each run is groupSize bits long.
 template<bitpos BITS>
-void includeAlternatingBitGroups(
-    std::vector< qset<BITS> > &samples,
-    int groupSize
-) {
+void includeAlternatingBitGroups(SampleSets<BITS> &samples, int groupSize) {
   std::bitset<BITS> onOffVec, offOnVec;
-	qset<BITS> onOffSet, offOnSet;
+	quadset<BITS> onOffSet, offOnSet;
 
   onOffSet.reset();
   offOnSet.reset();
@@ -118,37 +135,48 @@ void includeAlternatingBitGroups(
 	expect_eq_set<BITS>("on-off set", onOffVec, onOffSet);
 	expect_eq_set<BITS>("off-on set", offOnVec, offOnSet);
 
-  samples.push_back(onOffSet);
-  samples.push_back(offOnSet);
+  samples.quadsets.push_back(onOffSet);
+  samples.quadsets.push_back(offOnSet);
+  samples.bitsets.push_back(onOffVec);
+  samples.bitsets.push_back(offOnVec);
 }
 
 // includeRandomSet adds a random set to samples[]. The set is created by
 // inserting n randomly chosen elements into an empty set.
 template<bitpos BITS>
-void includeRandomSet(std::vector< qset<BITS> > &samples, int n) {
-  std::minstd_rand generator(1 + samples.size());
+void includeRandomSet(SampleSets<BITS> &samples, int n) {
+  std::minstd_rand generator(1 + samples.quadsets.size());
   std::uniform_int_distribution<uint32_t> distS(0, BITS-1);
   auto randS = std::bind(distS, generator);
 
-	auto set = qset<BITS>::make();
+	auto set = quadset<BITS>::make();
+  std::bitset<BITS> vec;
   
 	for (int i = 0; i < n; ++i) {
-		set.set(randS());
+    int r = randS();
+		set.set(r);
+    vec.set(r);
 	}
-	samples.push_back(set);
+	samples.quadsets.push_back(set);
+	samples.bitsets.push_back(vec);
 }
 
-
 template<bitpos BITS>
-std::vector< qset<BITS> > *getTestSets() {
-  static std::vector< qset<BITS> > samples;
-  if (samples.size() == 0) {
-    qset<BITS> empty, full;
+SampleSets<BITS> *getTestSets() {
+  static SampleSets<BITS> samples;
+  if (samples.quadsets.size() == 0) {
+
+    quadset<BITS> empty, full;
+    std::bitset<BITS> emptyVec, fullVec;
     empty.reset();
     full.set();
+    emptyVec.reset();
+    fullVec.set();
+    samples.quadsets.push_back(empty);
+    samples.quadsets.push_back(full);
+    samples.bitsets.push_back(emptyVec);
+    samples.bitsets.push_back(fullVec);
 
-    samples.push_back(empty);
-    samples.push_back(full);
     includePrimeSets<BITS>(samples);
     includeAlternatingBitGroups(samples, 7);
     includeAlternatingBitGroups(samples, 10);
@@ -164,7 +192,7 @@ std::vector< qset<BITS> > *getTestSets() {
 }
 
 template<bitpos BITS>
-int loopCountBits(qset<BITS> s) {
+int loopCountBits(quadset<BITS> s) {
   int count = 0;
   for (int i=0; i < s.size(); ++i) {
     if (s.test(i)) {
@@ -175,7 +203,7 @@ int loopCountBits(qset<BITS> s) {
 }
 
 template<bitpos BITS>
-void testShift(std::string label, qset<BITS> got, qset<BITS> base, bitpos shift) {
+void testShift(std::string label, quadset<BITS> got, quadset<BITS> base, bitpos shift) {
   for (bitpos i = 0; i < BITS; ++i) {
     if (got.test(i) != base.test(i-shift)) {
       std::cout << label << ": "
@@ -252,24 +280,6 @@ void testShift(std::string label, qset<BITS> got, qset<BITS> base, bitpos shift)
 #undef SIZE
 
 #define SET set192
-#define SIZE 192
-#include "quadset_test.inc"
-#undef SET
-#undef SIZE
-
-#define SET qs64
-#define SIZE 64
-#include "quadset_test.inc"
-#undef SET
-#undef SIZE
-
-#define SET qs128
-#define SIZE 128
-#include "quadset_test.inc"
-#undef SET
-#undef SIZE
-
-#define SET qs192
 #define SIZE 192
 #include "quadset_test.inc"
 #undef SET

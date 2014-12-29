@@ -19,6 +19,10 @@ public:
 
   typedef qset<BITS,2> qSet;
 
+  static inline constexpr qSet from_ullong(uint64_t val) {
+    return qSet{val};
+  }
+
   static inline constexpr qSet make() {
     return qSet{0};
   }
@@ -331,9 +335,9 @@ public:
   }
 
   // Clear bits a, b, c, ....
-  inline constexpr qSet& flip(std::initializer_list<bitpos> list) {
+  inline constexpr qSet& reset(std::initializer_list<bitpos> list) {
     for (bitpos i : list) {
-      this->flip(i);
+      this->reset(i);
     }
     return *this;
   }
@@ -377,6 +381,14 @@ public:
       // The requested range spans a quadword boundary.
       b0 ^= bitRange(m, 63);
       b1 ^= bitRange(0, n & 0x3F);
+    }
+    return *this;
+  }
+
+  // Toggle bits a, b, c, ....
+  inline constexpr qSet& flip(std::initializer_list<bitpos> list) {
+    for (bitpos i : list) {
+      this->flip(i);
     }
     return *this;
   }

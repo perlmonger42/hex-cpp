@@ -5,8 +5,11 @@
 // The test case name and the test name should both be valid C++
 // identifiers.  And you should not use underscore (_) in the names.
 
-TEST(SET, statics) {
+TEST(SET, StaticValues) {
   SET s;
+
+  // sizeof (make sure quadset<BITS> uses the correct qset specialization)
+  EXPECT_EQ(((SIZE+63)/64) * 8, sizeof(s));
 
   // size()
   EXPECT_EQ(s.size(), SIZE);
@@ -93,6 +96,30 @@ TEST(SET, setAndTest) {
   auto want = stream.str();
   EXPECT_EQ(want, s.to_string());
 
+  s.set();
+  EXPECT_EQ(s, SET::universe());
+
+  s = SET::make();
+  s.set(27, SIZE);
+  // stream.str("");
+  // stream.clear();
+  std::stringstream stream2;
+  stream2 << "{27.." << s.size()-1 << '}';
+  want = stream2.str();
+  EXPECT_EQ(want, s.to_string());
+
+  s = SET::make();
+  s.set(12, 20);
+  EXPECT_EQ("{12..19}", s.to_string());
+
+  s = SET::make();
+  s.set({});
+  EXPECT_EQ("{}", s.to_string());
+
+  s = SET::make();
+  s.set({10, 9, 8, 1, 5});
+  EXPECT_EQ("{1, 5, 8..10}", s.to_string());
+
   
   // Repeat N times:
   //   Set M to a value in 0..s.size()/4.
@@ -107,19 +134,111 @@ TEST(SET, setAndTest) {
   const int N = 10000;
   for (int i = 0; i < N; ++i) {
     int M = randM();
-    auto qset = SET::make();
-    auto bset = std::bitset<qset.size()>();
+    auto quad = SET::make();
+    auto bits = std::bitset<quad.size()>();
     for (int j = 0; j < M; ++j) {
       int k = randS();
-      bset.set(k);
-      qset.set(k);
+      bits.set(k);
+      quad.set(k);
     }
-    expect_eq_set<SIZE>("set", bset, qset);
-    for (int j = 0; j < qset.size(); ++j) {
-      EXPECT_EQ(bset.test(j), qset.test(j));
+    expect_eq_set<SIZE>("set", bits, quad);
+    for (int j = 0; j < quad.size(); ++j) {
+      EXPECT_EQ(bits.test(j), quad.test(j));
     }
   }
 };
+
+TEST(SET, setBuilders) {
+  // static initializer
+  SET s = SET{15};
+  EXPECT_EQ("{0..3}", s.to_string());
+
+  // from_ullong()
+  s = SET::from_ullong(0x8FA5);
+  EXPECT_EQ("{0, 2, 5, 7..11, 15}", s.to_string());
+
+  s = SET::from_ullong(0x40);
+  EXPECT_EQ("{6}", s.to_string());
+
+  // make()
+  EXPECT_EQ("{}", SET::make().to_string());
+  EXPECT_EQ("{0}", SET::make(0).to_string());
+  EXPECT_EQ("{0, 2}", SET::make(0, 2).to_string());
+  EXPECT_EQ("{0, 2, 3}", SET::make(0, 2, 3).to_string());
+  EXPECT_EQ("{0, 2, 3, 5}", SET::make(0, 2, 3, 5).to_string());
+  EXPECT_EQ("{0, 2, 3, 5, 7}", SET::make(0, 2, 3, 5, 7).to_string());
+  EXPECT_EQ("{0, 2, 3, 5, 7, 9}", SET::make(0, 2, 3, 5, 7, 9).to_string());
+  EXPECT_EQ("{0, 2, 3, 5..7, 9}", SET::make(0, 2, 3, 5, 7, 9, 6).to_string());
+  EXPECT_EQ("{0, 2, 3, 5..9}", SET::make(0, 2, 3, 5, 7, 9, 6, 8).to_string());
+  EXPECT_EQ("{0, 2..9}", SET::make(0, 2, 3, 4, 5, 6, 7, 8, 9).to_string());
+  EXPECT_EQ("{0..6}", SET::make(0, 1, 2, 3, 4, 5, 6).to_string());
+
+  std::stringstream stream;
+  stream << "{0, " << SIZE-1 << '}';
+  auto want = stream.str();
+  EXPECT_EQ(want, SET::make(0, SIZE-1).to_string());
+  s = SET::make();
+  EXPECT_EQ("{}", s.to_string());
+
+  s = SET::make(15);
+  EXPECT_EQ("{15}", s.to_string());
+
+  s = SET::make(2, 4, 8, 10);
+  EXPECT_EQ("{2, 4, 8, 10}", s.to_string());
+
+  s = SET::make(2, 4, 8, 10);
+  EXPECT_EQ("{2, 4, 8, 10}", s.to_string());
+
+  s = SET::make({});
+  EXPECT_EQ("{}", s.to_string());
+
+  s = SET::make({1, 3, 5, 7, 9});
+  EXPECT_EQ("{1, 3, 5, 7, 9}", s.to_string());
+
+  // range()
+  s = SET::range(12, 12);
+  EXPECT_EQ("{}", s.to_string());
+
+  s = SET::range(5, 6);
+  EXPECT_EQ("{5}", s.to_string());
+
+  s = SET::range(10, s.size()-8);
+  std::stringstream stream2;
+  stream2 << "{10.." << SIZE-9 << '}';
+  want = stream2.str();
+  EXPECT_EQ(want, s.to_string());
+
+  s = SET::range(5, 10);
+  EXPECT_EQ("{5..9}", s.to_string());
+
+  s = SET::range(2, 41);
+  EXPECT_EQ("{2..40}", s.to_string());
+
+  std::stringstream stream3;
+  stream3 << "{7.." << s.size()-5 << '}';
+  want = stream3.str();
+  EXPECT_EQ(want, SET::range(7, s.size()-4).to_string());
+
+  
+  std::minstd_rand generator;
+  std::uniform_int_distribution<uint32_t> distribution(0, s.size()-1);
+  auto rand = std::bind(distribution, generator);
+  const int N = 100;
+  // Repeat N times:
+  //   Set rLo, rHi to a random range in 0..s.size().
+  //   Set bits[i]=1 for each in i rLo..rHi-1.
+  //   Check that SET::range(rLo, rHi).test(i) matches bits[i], for all i.
+  for (int i = 0; i < N; ++i) {
+    std::bitset<SIZE> bits;
+    bitpos rLo = rand();
+    std::uniform_int_distribution<uint32_t> distribution2(rLo, SIZE);
+    bitpos rHi = distribution2(generator);
+    for (int j = rLo; j < rHi; ++j) {
+      bits.set(j);
+    }
+    expect_eq_set<SIZE>("range", bits, SET::range(rLo, rHi));
+  }
+}
 
 TEST(SET, reset) {
   auto s = SET::range(0, 10);
@@ -138,6 +257,18 @@ TEST(SET, reset) {
   s.reset(20);
   EXPECT_EQ("{}", s.to_string());
 
+
+  s = SET::range(10, 20);
+  s.reset(13, 18);
+  EXPECT_EQ("{10..12, 18, 19}", s.to_string());
+  s.reset(11, 11);
+  EXPECT_EQ("{10..12, 18, 19}", s.to_string());
+
+  s.reset({});
+  EXPECT_EQ("{10..12, 18, 19}", s.to_string());
+  s.reset({11, 18, SIZE-1});
+  EXPECT_EQ("{10, 12, 19}", s.to_string());
+
   
   // Repeat N times:
   //   Set M to a value in 0..s.size()/4.
@@ -152,68 +283,77 @@ TEST(SET, reset) {
   const int N = 10000;
   for (int i = 0; i < N; ++i) {
     int M = randM();
-    auto qset = SET::make();
-    auto bset = std::bitset<qset.size()>();
-    bset.set();
-    qset.set();
+    auto quad = SET::make();
+    auto bits = std::bitset<quad.size()>();
+    bits.set();
+    quad.set();
     for (int j = 0; j < M; ++j) {
       int k = randS();
-      bset.reset(k);
-      qset.reset(k);
+      bits.reset(k);
+      quad.reset(k);
     }
-    expect_eq_set<SIZE>("reset", bset, qset);
+    expect_eq_set<SIZE>("reset", bits, quad);
   }
 };
 
-TEST(SET, make) {
-  EXPECT_EQ("{}", SET::make().to_string());
-  EXPECT_EQ("{0}", SET::make(0).to_string());
-  EXPECT_EQ("{0, 2}", SET::make(0, 2).to_string());
-  EXPECT_EQ("{0, 2, 3}", SET::make(0, 2, 3).to_string());
-  EXPECT_EQ("{0, 2, 3, 5}", SET::make(0, 2, 3, 5).to_string());
-  EXPECT_EQ("{0, 2, 3, 5, 7}", SET::make(0, 2, 3, 5, 7).to_string());
-  EXPECT_EQ("{0, 2, 3, 5, 7, 9}", SET::make(0, 2, 3, 5, 7, 9).to_string());
-  EXPECT_EQ("{0, 2, 3, 5..7, 9}", SET::make(0, 2, 3, 5, 7, 9, 6).to_string());
-  EXPECT_EQ("{0, 2, 3, 5..9}", SET::make(0, 2, 3, 5, 7, 9, 6, 8).to_string());
-  EXPECT_EQ("{0, 2..9}", SET::make(0, 2, 3, 4, 5, 6, 7, 8, 9).to_string());
-  EXPECT_EQ("{0..6}", SET::make(0, 1, 2, 3, 4, 5, 6).to_string());
+TEST(SET, flip) {
+  auto s = SET::range(0, 10);
+  s.flip(5);
+  EXPECT_EQ("{0..4, 6..9}", s.to_string());
 
+  s = SET::make(10,20,30);
+  s.flip(10);
+  EXPECT_EQ("{20, 30}", s.to_string());
+  s.flip(15);
+  EXPECT_EQ("{15, 20, 30}", s.to_string());
+  s.flip(30);
+  EXPECT_EQ("{15, 20}", s.to_string());
+  s.flip(45);
+  EXPECT_EQ("{15, 20, 45}", s.to_string());
+  s.flip(20);
+  EXPECT_EQ("{15, 45}", s.to_string());
+
+
+  s = SET::range(10, 20);
+  s.flip(13, 18);
+  EXPECT_EQ("{10..12, 18, 19}", s.to_string());
+  s.flip(11, 11);
+  EXPECT_EQ("{10..12, 18, 19}", s.to_string());
+  s.flip(8, 14);
+  EXPECT_EQ("{8, 9, 13, 18, 19}", s.to_string());
+
+  s.flip({});
+  EXPECT_EQ("{8, 9, 13, 18, 19}", s.to_string());
+  s.flip({10, 18, SIZE-1});
   std::stringstream stream;
-  stream << "{0, " << SIZE-1 << '}';
+  stream << "{8..10, 13, 19, " << s.size()-1 << '}';
   auto want = stream.str();
-  EXPECT_EQ(want, SET::make(0, SIZE-1).to_string());
-};
-
-TEST(SET, range) {
-  auto s = SET::range(5, 10);
-  EXPECT_EQ("{5..9}", s.to_string());
-
-  s = SET::range(2, 41);
-  EXPECT_EQ("{2..40}", s.to_string());
-
-  std::stringstream stream;
-  stream << "{7.." << s.size()-5 << '}';
-  auto want = stream.str();
-  EXPECT_EQ(want, SET::range(7, s.size()-4).to_string());
+  EXPECT_EQ(want, s.to_string());
 
   
-  std::minstd_rand generator;
-  std::uniform_int_distribution<uint32_t> distribution(0, s.size()-1);
-  auto rand = std::bind(distribution, generator);
-  const int N = 100;
   // Repeat N times:
-  //   Set rLo, rHi to a random range in 0..s.size().
-  //   Set bset[i]=1 for each in i rLo..rHi-1.
-  //   Check that SET::range(rLo, rHi).test(i) matches bset[i], for all i.
+  //   Set M to a value in 0..s.size()/4.
+  //   Flip M random elements from a full set.
+  //   Flip the same M random elements from a full bitset.
+  //   Check that the quadset and the bitset have the same elements.
+  std::minstd_rand generator;
+  std::uniform_int_distribution<uint32_t> distM(0, s.size()/4);
+  std::uniform_int_distribution<uint32_t> distS(0, s.size()-1);
+  auto randM = std::bind(distM, generator);
+  auto randS = std::bind(distS, generator);
+  const int N = 10000;
   for (int i = 0; i < N; ++i) {
-    std::bitset<SIZE> bset;
-    bitpos rLo = rand();
-    std::uniform_int_distribution<uint32_t> distribution2(rLo, SIZE);
-    bitpos rHi = distribution2(generator);
-    for (int j = rLo; j < rHi; ++j) {
-      bset.set(j);
+    int M = randM();
+    auto quad = SET::make();
+    auto bits = std::bitset<quad.size()>();
+    bits.set();
+    quad.set();
+    for (int j = 0; j < M; ++j) {
+      int k = randS();
+      bits.flip(k);
+      quad.flip(k);
     }
-    expect_eq_set<SIZE>("range", bset, SET::range(rLo, rHi));
+    expect_eq_set<SIZE>("flip", bits, quad);
   }
 };
 
@@ -321,19 +461,19 @@ TEST(SET, count) {
   const int N = 1000;
   for (int i = 0; i < N; ++i) {
     int M = randM();
-    auto qset = SET::make();
-    auto bset = std::bitset<SIZE>();
+    auto quad = SET::make();
+    auto bits = std::bitset<SIZE>();
     for (int j = 0; j < M; ++j) {
       int k = randS();
-      qset.set(k);
-      bset.set(k);
+      quad.set(k);
+      bits.set(k);
     }
-    EXPECT_EQ(bset.count(), qset.count());
+    EXPECT_EQ(bits.count(), quad.count());
   }
 
   auto samples = getTestSets<SIZE>();
-  for (int i = 0; i < samples->size(); ++i) {
-    auto a = samples->at(i);
+  for (int i = 0; i < samples->quadsets.size(); ++i) {
+    auto a = samples->quadsets.at(i);
     EXPECT_EQ(loopCountBits(a), a.count());
   }
 };
@@ -344,11 +484,11 @@ TEST(SET, EqNe) {
   EXPECT_EQ(false, SET::make()==SET::make(1));
   EXPECT_EQ(false, SET::make(20)==SET::make(20, 21));
 
-  std::vector< qset<SIZE> > *samples = getTestSets<SIZE>();
-  for (int i = 0; i < samples->size(); ++i) {
-    qset<SIZE> &a = samples->at(i);
-    for (int j = 0; j < samples->size(); ++j) {
-      qset<SIZE> &b = samples->at(j);
+  auto samples = getTestSets<SIZE>();
+  for (int i = 0; i < samples->quadsets.size(); ++i) {
+    auto &a = samples->quadsets.at(i);
+    for (int j = 0; j < samples->quadsets.size(); ++j) {
+      auto &b = samples->quadsets.at(j);
       EXPECT_EQ(i==j, a==b);
       EXPECT_EQ(i!=j, a!=b);
     }
@@ -408,7 +548,7 @@ TEST(SET, Shifts) {
   std::uniform_int_distribution<uint32_t> distS(0, SIZE);
   auto randS = std::bind(distS, generator);
 
-  for (auto set : *getTestSets<SIZE>()) {
+  for (auto set : getTestSets<SIZE>()->quadsets) {
     bitpos distance = 0;
     while (distance < SIZE) {
       distance += randS();
@@ -424,6 +564,86 @@ TEST(SET, Shifts) {
       testShift("RightShiftAssign", rightcopy, set, -distance);
 
       //distance += 20;
+    }
+  }
+};
+
+TEST(SET, BoolOps) {
+  SET s = SET::make(0, 1);
+  SET t = SET::make(1, 2);
+  SET u = SET::range(50, SIZE);
+
+  EXPECT_EQ("{1}", (s & t).to_string());
+  EXPECT_EQ("{0..2}", (s | t).to_string());
+  EXPECT_EQ("{0, 2}", (s ^ t).to_string());
+  EXPECT_EQ("{0}", (s - t).to_string());
+  EXPECT_EQ("{0..49}", (~u).to_string());
+
+  SET v = s;
+  v &= t;
+  EXPECT_EQ("{1}", v.to_string());
+  v = s;
+  v |= t;
+  EXPECT_EQ("{0..2}", v.to_string());
+  v = s;
+  v ^= t;
+  EXPECT_EQ("{0, 2}", v.to_string());
+  v = s;
+  v -= t;
+  EXPECT_EQ("{0}", v.to_string());
+  
+
+  auto samples = getTestSets<SIZE>();
+  for (int i = 0; i < samples->quadsets.size(); ++i) {
+    auto q1 = samples->quadsets.at(i);
+    auto b1 = samples->bitsets.at(i);
+    auto quad = ~q1;
+    auto bits = ~b1;
+    expect_op_result<SIZE>("~", bits, q1, q1, quad);
+
+    for (int j = 0; j < samples->quadsets.size(); ++j) {
+      auto q2 = samples->quadsets.at(j);
+      auto b2 = samples->bitsets.at(j);
+
+      quad = q1 & q2;
+      bits = b1 & b2;
+      expect_op_result<SIZE>("&", bits, q1, q2, quad);
+
+      quad = q1 | q2;
+      bits = b1 | b2;
+      expect_op_result<SIZE>("|", bits, q1, q2, quad);
+
+      quad = q1 ^ q2;
+      bits = b1 ^ b2;
+      expect_op_result<SIZE>("^", bits, q1, q2, quad);
+
+      quad = q1 - q2;
+      bits = b1 & ~b2;
+      expect_op_result<SIZE>("-", bits, q1, q2, quad);
+
+      quad = q1;
+      bits = b1;
+      quad &= q2;
+      bits &= b2;
+      expect_op_result<SIZE>("&", bits, q1, q2, quad);
+
+      quad = q1;
+      bits = b1;
+      quad |= q2;
+      bits |= b2;
+      expect_op_result<SIZE>("|=", bits, q1, q2, quad);
+
+      quad = q1;
+      bits = b1;
+      quad ^= q2;
+      bits ^= b2;
+      expect_op_result<SIZE>("^=", bits, q1, q2, quad);
+
+      quad = q1;
+      bits = b1;
+      quad -= q2;
+      bits &= ~b2;
+      expect_op_result<SIZE>("-=", bits, q1, q2, quad);
     }
   }
 };
