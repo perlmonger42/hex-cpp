@@ -3,10 +3,15 @@
 #include <initializer_list>
 #include "../quadset/quadset.h"
 
-template<bitpos S, bitpos BITS = S*S, bitpos QUADWORDS = (BITS+63) / 64>
-class cellset : public quadset<S*S> {
+// SIZE is the edge length of the board.
+// BITS is the number of cells on a board of that size.
+// QUADS is the number of 64-bit unsigned integers necessary
+// to represent a set of cells on a board of that size.
+// For example, an 11×11 board has SIZE=11, BITS=121, and QUADS=2.
+template<bitpos SIZE, bitpos BITS = SIZE*SIZE, bitpos QUADS = (BITS+63) / 64>
+class cellset : public quadset<SIZE*SIZE> {
 public:
-  typedef cellset<S> cellSet;
+  typedef cellset<SIZE> cellSet;
   typedef quadset<BITS> quadSet;
 
   inline constexpr cellset() { quadSet::reset(); }
@@ -210,29 +215,29 @@ public:
 
 
   static inline constexpr cellSet top() {
-    return cellSet{ uint64_t(-1LL) >> (64-S) };
+    return cellSet{ uint64_t(-1LL) >> (64-SIZE) };
   }
 
   static inline constexpr cellSet bottom() {
-    return top() << (BITS - S);
+    return top() << (BITS - SIZE);
   }
 
   static inline constexpr cellSet left() {
-    return cellSet{ quadSet::repeat_block(quadSet{1}, S, S) };
+    return cellSet{ quadSet::repeat_block(quadSet{1}, SIZE, SIZE) };
   }
 
   static inline constexpr cellSet right() {
-    return cellSet{ quadSet::repeat_block(quadSet{1<<(S-1)}, S, S) };
+    return cellSet{ quadSet::repeat_block(quadSet{1<<(SIZE-1)}, SIZE, SIZE) };
   }
 
   constexpr cellSet neighbors() const {
     constexpr auto l = ~left();
     constexpr auto r = ~right();
     auto s = *this;
-    return ( (s >> S)
-           | (((s >> (S - 1)) | (s << 1)) & l)
-           | (((s << (S - 1)) | (s >> 1)) & r)
-           | (s << S)
+    return ( (s >> SIZE)
+           | (((s >> (SIZE - 1)) | (s << 1)) & l)
+           | (((s << (SIZE - 1)) | (s >> 1)) & r)
+           | (s << SIZE)
            );
   }
 
@@ -240,10 +245,10 @@ public:
     constexpr auto l = left().fast_not();
     constexpr auto r = right().fast_not();
     auto s = *this;
-    return ( (s >> S)
-           | (((s >> (S - 1)) | s.fast_lsh(1)) & l)
-           | ((s.fast_lsh(S - 1) | (s >> 1)) & r)
-           | s.fast_lsh(S)
+    return ( (s >> SIZE)
+           | (((s >> (SIZE - 1)) | s.fast_lsh(1)) & l)
+           | ((s.fast_lsh(SIZE - 1) | (s >> 1)) & r)
+           | s.fast_lsh(SIZE)
            );
   }
 
@@ -258,7 +263,7 @@ public:
 //static_assert (std::is_pod< cellset<8> >::value, "cellset must be POD");
 
 
-template<bitpos S>
-std::ostream& operator<< (std::ostream &out, cellset<S> set) {
+template<bitpos SIZE>
+std::ostream& operator<< (std::ostream &out, cellset<SIZE> set) {
   return set.emit(out);
 }
