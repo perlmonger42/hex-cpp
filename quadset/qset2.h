@@ -27,13 +27,6 @@ public:
     return qSet{0};
   }
 
-  template<typename... Args>
-  static inline constexpr qSet make(bitpos p, Args... args) {
-    qSet pSet = {0};
-    pSet.set(p);
-    return pSet | make(args...);
-  }
-
   static inline constexpr qSet make(std::initializer_list<bitpos> list) {
     qSet result;
     result.reset();

@@ -162,31 +162,31 @@ TEST(SET, setBuilders) {
 
   // make()
   EXPECT_EQ("{}", SET::make().to_string());
-  EXPECT_EQ("{0}", SET::make(0).to_string());
-  EXPECT_EQ("{0, 2}", SET::make(0, 2).to_string());
-  EXPECT_EQ("{0, 2, 3}", SET::make(0, 2, 3).to_string());
-  EXPECT_EQ("{0, 2, 3, 5}", SET::make(0, 2, 3, 5).to_string());
-  EXPECT_EQ("{0, 2, 3, 5, 7}", SET::make(0, 2, 3, 5, 7).to_string());
-  EXPECT_EQ("{0, 2, 3, 5, 7, 9}", SET::make(0, 2, 3, 5, 7, 9).to_string());
-  EXPECT_EQ("{0, 2, 3, 5..7, 9}", SET::make(0, 2, 3, 5, 7, 9, 6).to_string());
-  EXPECT_EQ("{0, 2, 3, 5..9}", SET::make(0, 2, 3, 5, 7, 9, 6, 8).to_string());
-  EXPECT_EQ("{0, 2..9}", SET::make(0, 2, 3, 4, 5, 6, 7, 8, 9).to_string());
-  EXPECT_EQ("{0..6}", SET::make(0, 1, 2, 3, 4, 5, 6).to_string());
+  EXPECT_EQ("{0}", SET::make({0}).to_string());
+  EXPECT_EQ("{0, 2}", SET::make({0, 2}).to_string());
+  EXPECT_EQ("{0, 2, 3}", SET::make({0, 2, 3}).to_string());
+  EXPECT_EQ("{0, 2, 3, 5}", SET::make({0, 2, 3, 5}).to_string());
+  EXPECT_EQ("{0, 2, 3, 5, 7}", SET::make({0, 2, 3, 5, 7}).to_string());
+  EXPECT_EQ("{0, 2, 3, 5, 7, 9}", SET::make({0, 2, 3, 5, 7, 9}).to_string());
+  EXPECT_EQ("{0, 2, 3, 5..7, 9}", SET::make({0, 2, 3, 5, 7, 9, 6}).to_string());
+  EXPECT_EQ("{0, 2, 3, 5..9}", SET::make({0, 2, 3, 5, 7, 9, 6, 8}).to_string());
+  EXPECT_EQ("{0, 2..9}", SET::make({0, 2, 3, 4, 5, 6, 7, 8, 9}).to_string());
+  EXPECT_EQ("{0..6}", SET::make({0, 1, 2, 3, 4, 5, 6}).to_string());
 
   std::stringstream stream;
   stream << "{0, " << SIZE-1 << '}';
   auto want = stream.str();
-  EXPECT_EQ(want, SET::make(0, SIZE-1).to_string());
+  EXPECT_EQ(want, SET::make({0, SIZE-1}).to_string());
   s = SET::make();
   EXPECT_EQ("{}", s.to_string());
 
-  s = SET::make(15);
+  s = SET::make({15});
   EXPECT_EQ("{15}", s.to_string());
 
-  s = SET::make(2, 4, 8, 10);
+  s = SET::make({2, 4, 8, 10});
   EXPECT_EQ("{2, 4, 8, 10}", s.to_string());
 
-  s = SET::make(2, 4, 8, 10);
+  s = SET::make({2, 4, 8, 10});
   EXPECT_EQ("{2, 4, 8, 10}", s.to_string());
 
   s = SET::make({});
@@ -245,7 +245,7 @@ TEST(SET, reset) {
   s.reset(5);
   EXPECT_EQ("{0..4, 6..9}", s.to_string());
 
-  s = SET::make(10,20,30);
+  s = SET::make({10,20,30});
   s.reset(10);
   EXPECT_EQ("{20, 30}", s.to_string());
   s.reset(15);
@@ -301,7 +301,7 @@ TEST(SET, flip) {
   s.flip(5);
   EXPECT_EQ("{0..4, 6..9}", s.to_string());
 
-  s = SET::make(10,20,30);
+  s = SET::make({10,20,30});
   s.flip(10);
   EXPECT_EQ("{20, 30}", s.to_string());
   s.flip(15);
@@ -359,10 +359,10 @@ TEST(SET, flip) {
 
 TEST(SET, any) {
   EXPECT_EQ(false, SET::make().any());
-  EXPECT_EQ(true, SET::make(0).any());
-  EXPECT_EQ(true, SET::make(1).any());
-  EXPECT_EQ(true, SET::make(19).any());
-  EXPECT_EQ(true, SET::make(SIZE-1).any());
+  EXPECT_EQ(true, SET::make({0}).any());
+  EXPECT_EQ(true, SET::make({1}).any());
+  EXPECT_EQ(true, SET::make({19}).any());
+  EXPECT_EQ(true, SET::make({SIZE-1}).any());
 
   
   // Repeat N times:
@@ -387,10 +387,10 @@ TEST(SET, any) {
 
 TEST(SET, none) {
   EXPECT_EQ(true,  SET::make().none());
-  EXPECT_EQ(false, SET::make(0).none());
-  EXPECT_EQ(false, SET::make(1).none());
-  EXPECT_EQ(false, SET::make(19).none());
-  EXPECT_EQ(false, SET::make(SIZE-1).none());
+  EXPECT_EQ(false, SET::make({0}).none());
+  EXPECT_EQ(false, SET::make({1}).none());
+  EXPECT_EQ(false, SET::make({19}).none());
+  EXPECT_EQ(false, SET::make({SIZE-1}).none());
 
   // Repeat N times:
   //   Set M to an integer in the range 0..3.
@@ -414,9 +414,9 @@ TEST(SET, none) {
 
 TEST(SET, all) {
   EXPECT_EQ(false, SET::make().all());
-  EXPECT_EQ(false, SET::make(0).all());
-  EXPECT_EQ(false, SET::make(1).all());
-  EXPECT_EQ(false, SET::make(19).all());
+  EXPECT_EQ(false, SET::make({0}).all());
+  EXPECT_EQ(false, SET::make({1}).all());
+  EXPECT_EQ(false, SET::make({19}).all());
   EXPECT_EQ(true,  SET::range(0, SIZE).all());
 
   // Repeat N times:
@@ -443,9 +443,9 @@ TEST(SET, all) {
 
 TEST(SET, count) {
   EXPECT_EQ(0, SET::make().count());
-  EXPECT_EQ(1, SET::make(0).count());
-  EXPECT_EQ(1, SET::make(1).count());
-  EXPECT_EQ(2, SET::make(19, 20).count());
+  EXPECT_EQ(1, SET::make({0}).count());
+  EXPECT_EQ(1, SET::make({1}).count());
+  EXPECT_EQ(2, SET::make({19, 20}).count());
   EXPECT_EQ(SIZE, SET::range(0, SIZE).count());
 
   // Repeat N times:
@@ -480,9 +480,9 @@ TEST(SET, count) {
 
 TEST(SET, EqNe) {
   EXPECT_EQ(true, SET::make()==SET::make());
-  EXPECT_EQ(true, SET::make(7)==SET::make(7));
-  EXPECT_EQ(false, SET::make()==SET::make(1));
-  EXPECT_EQ(false, SET::make(20)==SET::make(20, 21));
+  EXPECT_EQ(true, SET::make({7})==SET::make({7}));
+  EXPECT_EQ(false, SET::make()==SET::make({1}));
+  EXPECT_EQ(false, SET::make({20})==SET::make({20, 21}));
 
   auto samples = getTestSets<SIZE>();
   for (int i = 0; i < samples->quadsets.size(); ++i) {
@@ -497,14 +497,14 @@ TEST(SET, EqNe) {
 
 TEST(SET, ToUllong) {
   EXPECT_EQ(0UL, SET::make().to_ullong());
-  EXPECT_EQ(128UL, SET::make(7).to_ullong());
-  EXPECT_EQ(2UL, SET::make(1).to_ullong());
-  EXPECT_EQ(3UL << 20, SET::make(20, 21).to_ullong());
+  EXPECT_EQ(128UL, SET::make({7}).to_ullong());
+  EXPECT_EQ(2UL, SET::make({1}).to_ullong());
+  EXPECT_EQ(3UL << 20, SET::make({20, 21}).to_ullong());
 };
 
 TEST(SET, Shifts) {
   SET s;
-  s = SET::make(1, 3, 4, 10);
+  s = SET::make({1, 3, 4, 10});
   EXPECT_EQ("{1, 3, 4, 10}", (s<<0).to_string());
   EXPECT_EQ("{2, 4, 5, 11}", (s<<1).to_string());
   EXPECT_EQ("{4, 6, 7, 13}", (s<<3).to_string());
@@ -524,7 +524,7 @@ TEST(SET, Shifts) {
   EXPECT_EQ("{}", s.to_string());
 
 
-  s = SET::make(34, 36, 37, 43);
+  s = SET::make({34, 36, 37, 43});
   EXPECT_EQ("{34, 36, 37, 43}", (s>>0).to_string());
   EXPECT_EQ("{33, 35, 36, 42}", (s>>1).to_string());
   EXPECT_EQ("{31, 33, 34, 40}", (s>>3).to_string());
@@ -574,8 +574,8 @@ TEST(SET, Shifts) {
 };
 
 TEST(SET, BoolOps) {
-  SET s = SET::make(0, 1);
-  SET t = SET::make(1, 2);
+  SET s = SET::make({0, 1});
+  SET t = SET::make({1, 2});
   SET u = SET::range(50, SIZE);
 
   EXPECT_EQ("{1}", (s & t).to_string());
@@ -618,10 +618,10 @@ TEST(SET, BoolOps) {
   EXPECT_EQ("{}", v.to_string());
 
   // Test that ~s leaves unused bits in the zero state.
-  s = ~SET::make(0, SIZE-1);
+  s = ~SET::make({0, SIZE-1});
   t = SET::range(1, SIZE-1);
   EXPECT_EQ(s, t);
-  s = SET::make(0, SIZE-1).fast_not().clean();
+  s = SET::make({0, SIZE-1}).fast_not().clean();
   EXPECT_EQ(s, t);
 
   // Test that (~set)>>1 doesn't introduce any new elements.

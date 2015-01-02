@@ -134,11 +134,6 @@ public:
     return quadSet{ qSet::make() };
   }
 
-  template<typename... Args>
-  static inline constexpr quadSet make(bitpos p, Args... args) {
-    return quadSet{ qSet::make(p, args...) };
-  }
-
   static inline quadSet make(std::initializer_list<bitpos> list) {
     return quadSet{ qSet::make(list) };
   }

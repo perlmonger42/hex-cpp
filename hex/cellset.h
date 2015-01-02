@@ -24,11 +24,6 @@ public:
     return cellSet{ quadSet::make() };
   }
 
-  template<typename... Args>
-  static inline constexpr cellSet make(bitpos p, Args... args) {
-    return cellSet{ quadSet::make(p, args...) };
-  }
-
   static inline cellSet make(std::initializer_list<bitpos> list) {
     return cellSet{ quadSet::make(list) };
   }
