@@ -33,8 +33,8 @@ TEST(BoardConstruction, BoardContentConstructor) {
   //auto all = CellSet<1>::make({0});
   //auto nil = CellSet<1>::make({});
   CellSet<1> all, nil;
-  all.clear().set(0);
-  nil.clear();
+  all.reset().set(0);
+  nil.reset();
 
   {
     Board<1> sample1("-");
@@ -83,9 +83,9 @@ TEST(BoardConstruction, BoardContentConstructor) {
         - O - X
          X - - O)");
     CellSet<4> x, o, e, n; // owned by X, O, Either, or Neither
-    x.clear().set(6).set(11).set(12);
-    o.clear().set(9).set(15);
-    e.clear().set(6).set(9).set(11).set(12).set(15);
+    x.reset().set(6).set(11).set(12);
+    o.reset().set(9).set(15);
+    e.reset().set(6).set(9).set(11).set(12).set(15);
     n = CellSet<4>::make({0,1,2,3,4,5,7,8,10,13,14});
     EXPECT_EQ('O', sample4.player());
     EXPECT_EQ('X', sample4.opponent());
@@ -205,7 +205,7 @@ void runBoardStateTest(boardStateTest<N> d) {
     char player = m.player;
     char opponent = player == 'X' ? 'O' : 'X';
     CellSet<N> vert, horz;
-    vert.clear(), horz.clear();
+    vert.reset(), horz.reset();
     for (auto i : m.vertical) { vert.set(i); }
     for (auto i : m.horizontal) { horz.set(i); }
 

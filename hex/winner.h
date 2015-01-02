@@ -60,8 +60,8 @@ bool Board<N>::isConnected(CellSet<N> start, CellSet<N> owned, CellSet<N> stop){
   // neighbors of that set. Continue until the sets overlap, or until neither
   // set changes.
   for (;;) {
-    Set startNeighbors = startGroup.neighbors();
-    Set stopNeighbors = stopGroup.neighbors();
+    Set startNeighbors = startGroup.fast_neighbors();
+    Set stopNeighbors = stopGroup.fast_neighbors();
 
     Set newStartGroup = (startNeighbors & owned) | startGroup;
     Set newStopGroup = (stopNeighbors & owned) | stopGroup;
@@ -147,10 +147,10 @@ bool Board<N>::isVirtuallyConnected(
   // neighbors of that set. Continue until the sets overlap, or until neither
   // set changes.
   for (;;) {
-    Set startNeighbors = startGroup.neighbors();
-    Set stopNeighbors = stopGroup.neighbors();
-
+    Set startNeighbors = startGroup.fast_neighbors();
     Set newStartGroup = (startNeighbors & owned) | startGroup;
+
+    Set stopNeighbors = stopGroup.fast_neighbors();
     Set newStopGroup = (stopNeighbors & owned) | stopGroup;
 
     if (newStartGroup == startGroup && newStopGroup == stopGroup) {
