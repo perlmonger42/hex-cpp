@@ -5,22 +5,22 @@
 
 
 template<bitpos S, bitpos BITS = S*S, bitpos QUADWORDS = (BITS+63) / 64>
-class CellSet : public quadset<S*S> {
+class cellset : public quadset<S*S> {
 public:
-  typedef CellSet<S> cellSet;
+  typedef cellset<S> cellSet;
   typedef quadset<BITS> quadSet;
   //static constexpr bitpos size = S; // Edge length. A board is size×size cells.
   //static constexpr bitpos max = S*S-1; // Cell numbers run from 0 to max.
   //static constexpr bitpos count = S*S; // The number of cells on an N×N board.
 
 
-  constexpr CellSet() { quadSet::reset(); }
-  constexpr CellSet(uint64_t val) : quadSet{val} { }
-  constexpr CellSet(quadSet val) : quadSet(val) { }
-  // constexpr CellSet() : quadSet() { }
-  // constexpr CellSet(quadSet const &other) : quadSet(other) { }
-  // constexpr CellSet(CellSet const &other) : quadSet(other) { }
-  // constexpr CellSet(unsigned long long val) : quadSet{val} { }
+  constexpr cellset() { quadSet::reset(); }
+  constexpr cellset(uint64_t val) : quadSet{val} { }
+  constexpr cellset(quadSet val) : quadSet(val) { }
+  // constexpr cellset() : quadSet() { }
+  // constexpr cellset(quadSet const &other) : quadSet(other) { }
+  // constexpr cellset(cellset const &other) : quadSet(other) { }
+  // constexpr cellset(unsigned long long val) : quadSet{val} { }
   
   static constexpr cellSet make() {
     return cellSet{ quadSet::make() };
@@ -270,11 +270,11 @@ public:
   }
 };
 
-//static_assert (std::is_pod< CellSet<8> >::value, "CellSet must be POD");
+//static_assert (std::is_pod< cellset<8> >::value, "cellset must be POD");
 
 
 template<bitpos S>
-std::ostream& operator<< (std::ostream &out, CellSet<S> set) {
+std::ostream& operator<< (std::ostream &out, cellset<S> set) {
   return set.emit(out);
 }
 

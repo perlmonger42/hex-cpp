@@ -14,8 +14,9 @@ For an introduction to the game, see the
 Included in this project are these components:
 
 - Three different bitset implementations, for representing subsets of {0..63},
-  {0..127}, and {0..191} respectively.
-- The `CellSet` class, which wraps a bitset with Hex-specific methods to
+  {0..127}, and {0..191} respectively. These are called quadsets, because they
+  use 1, 2, or 3 quadword (uint64\_t) data members.
+- The `cellset` class, which wraps a quadset with Hex-specific methods to
   represent sets of Hex cells.
 - The `Board` class, which represents a game configuration.
   
@@ -32,7 +33,8 @@ positions. It is able to do this in about 1375 nanoseconds. A variant of the
 program that uses std::bitset instead of the handcrafted bitset implementations
 requires more than two seconds to do the same job (that's 2,000,000+
 nanoseconds). You can see the comparison yourself by checking out the branch
-`explore/std-bitset`.
+`explore/std-bitset`. The shift operators provided by std::bitset are probably
+the cause of most of that dramatic speed difference.
   
 
 Requirements for Building
@@ -43,7 +45,7 @@ it portable.
 
 Requirements:
 * [cmake](http://www.cmake.org/) 2.8.11 or newer.
-* A C++11 compiler.
+* A C++14 compiler.
 * [Google Test](https://code.google.com/p/googletest/) 1.7.0.
 
 The build system uses [cmake](http://www.cmake.org/), and could theoretically

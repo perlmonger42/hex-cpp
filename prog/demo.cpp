@@ -3,15 +3,15 @@
 #include "board.h"
 #include "winner.h"
 
-//template class CellSet<4>;
+//template class cellset<4>;
 //template class StandardSets<4>;
 //template class Board<13>;
 
 int main(int argc, char **argv) {
 
   //std::cout << "bit<64,4> is pod: " << std::is_pod< bit<64,4> >::value << std::endl;
-  //std::cout << "CellSet<4> is pod: " << std::is_pod< CellSet<4> >::value << std::endl;
-  std::cout << "All: " << CellSet<4>::universe() << " : " << CellSet<4>::universe().to_ullong() << std::endl;
+  //std::cout << "cellset<4> is pod: " << std::is_pod< cellset<4> >::value << std::endl;
+  std::cout << "All: " << cellset<4>::universe() << " : " << cellset<4>::universe().to_ullong() << std::endl;
   // std::cout << "Top: " << StandardSets<4>::top << " : " << StandardSets<4>::top.to_ullong() << std::endl;
   // std::cout << "Bottom: " << StandardSets<4>::bottom << " : " << StandardSets<4>::bottom.to_ullong() << std::endl;
   // std::cout << "Left: " << StandardSets<4>::left << " : " << StandardSets<4>::left.to_ullong() << std::endl;

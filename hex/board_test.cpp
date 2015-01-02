@@ -30,9 +30,9 @@ TEST(BoardConstruction, BoardDefaultConstructor) {
 
 // Tests content constructor for Board.
 TEST(BoardConstruction, BoardContentConstructor) {
-  //auto all = CellSet<1>::make({0});
-  //auto nil = CellSet<1>::make({});
-  CellSet<1> all, nil;
+  //auto all = cellset<1>::make({0});
+  //auto nil = cellset<1>::make({});
+  cellset<1> all, nil;
   all.reset().set(0);
   nil.reset();
 
@@ -40,7 +40,7 @@ TEST(BoardConstruction, BoardContentConstructor) {
     Board<1> sample1("-");
     EXPECT_EQ('X', sample1.player());
     EXPECT_EQ('O', sample1.opponent());
-    CellSet<1> h{0}, v{0};
+    cellset<1> h{0}, v{0};
     EXPECT_EQ(v, sample1.verticalCells());
     EXPECT_EQ(h, sample1.horizontalCells());
     EXPECT_EQ("X:-", sample1.stateString());
@@ -82,11 +82,11 @@ TEST(BoardConstruction, BoardContentConstructor) {
        - - X -
         - O - X
          X - - O)");
-    CellSet<4> x, o, e, n; // owned by X, O, Either, or Neither
+    cellset<4> x, o, e, n; // owned by X, O, Either, or Neither
     x.reset().set(6).set(11).set(12);
     o.reset().set(9).set(15);
     e.reset().set(6).set(9).set(11).set(12).set(15);
-    n = CellSet<4>::make({0,1,2,3,4,5,7,8,10,13,14});
+    n = cellset<4>::make({0,1,2,3,4,5,7,8,10,13,14});
     EXPECT_EQ('O', sample4.player());
     EXPECT_EQ('X', sample4.opponent());
     EXPECT_EQ(x, sample4.verticalCells());
@@ -94,12 +94,12 @@ TEST(BoardConstruction, BoardContentConstructor) {
     EXPECT_EQ(e, sample4.occupiedCells());
     EXPECT_EQ(n, sample4.emptyCells());
 
-    EXPECT_EQ(CellSet<4>::make({0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}),
+    EXPECT_EQ(cellset<4>::make({0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}),
               sample4.allCells());
-    EXPECT_EQ(CellSet<4>::make({0,1,2,3}), sample4.topRow());
-    EXPECT_EQ(CellSet<4>::make({12,13,14,15}), sample4.bottomRow());
-    EXPECT_EQ(CellSet<4>::make({0,4,8,12}), sample4.leftColumn());
-    EXPECT_EQ(CellSet<4>::make({3,7,11,15}), sample4.rightColumn());
+    EXPECT_EQ(cellset<4>::make({0,1,2,3}), sample4.topRow());
+    EXPECT_EQ(cellset<4>::make({12,13,14,15}), sample4.bottomRow());
+    EXPECT_EQ(cellset<4>::make({0,4,8,12}), sample4.leftColumn());
+    EXPECT_EQ(cellset<4>::make({3,7,11,15}), sample4.rightColumn());
 
     EXPECT_EQ("O:------X--O-XX--O", sample4.stateString());
     EXPECT_EQ("O:O--XX-O--X------", sample4.reverseStateString());
@@ -111,8 +111,8 @@ TEST(BoardState, StateManagement) {
   Board<4> b;
   EXPECT_EQ('X', b.player());
   EXPECT_EQ('O', b.opponent());
-  EXPECT_EQ(CellSet<4>{0}, b.verticalCells());
-  EXPECT_EQ(CellSet<4>{0}, b.horizontalCells());
+  EXPECT_EQ(cellset<4>{0}, b.verticalCells());
+  EXPECT_EQ(cellset<4>{0}, b.horizontalCells());
   b.setPlayer('O');
   EXPECT_EQ('O', b.player());
   EXPECT_EQ('X', b.opponent());
@@ -145,8 +145,8 @@ TEST(BoardState, BoardPrinting) {
     std::ostringstream stream;
     stream << std::endl;
     Board<6>::MappedRender(stream, "      ", {
-      { 'O', CellSet<6>::make({ 1, 2, 3, 4, 7, 8, 9, 13 }) },
-      { '*', CellSet<6>::make({ 14 }) },
+      { 'O', cellset<6>::make({ 1, 2, 3, 4, 7, 8, 9, 13 }) },
+      { '*', cellset<6>::make({ 14 }) },
     });
     std::string expected = R"(
         a b c d e f
@@ -204,7 +204,7 @@ void runBoardStateTest(boardStateTest<N> d) {
 
     char player = m.player;
     char opponent = player == 'X' ? 'O' : 'X';
-    CellSet<N> vert, horz;
+    cellset<N> vert, horz;
     vert.reset(), horz.reset();
     for (auto i : m.vertical) { vert.set(i); }
     for (auto i : m.horizontal) { horz.set(i); }

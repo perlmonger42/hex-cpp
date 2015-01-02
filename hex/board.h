@@ -8,7 +8,7 @@
 #include "cellset.h"
 
 template<bitpos N>
-using PrintMap = std::map< char, CellSet<N> >;
+using PrintMap = std::map< char, cellset<N> >;
 
 // A Board represents the state of a Hex game, including information about
 // whose turn it is to play, and which cells are owned by each player.
@@ -18,12 +18,12 @@ public:
   static constexpr int size = N; // Edge length -- a board is size×size cells.
   static constexpr int max = N*N-1; // Cell numbers run from 0 to max.
   static constexpr int count = N*N; // The number of cells on an N×N board.
-  typedef CellSet<N> cellset; // The type of a set of cell-numbers.
+  typedef cellset<N> cellSet; // The type of a set of cell-numbers.
 
 private:
   char play; // 'X' if vertical to play, 'O' if horizontal
-  cellset vert; // Bitset of cells owned by the vertical player.
-  cellset horz; // Bitset of cells owned by the horizontal player.
+  cellSet vert; // Bitset of cells owned by the vertical player.
+  cellSet horz; // Bitset of cells owned by the horizontal player.
 
 public:
   // Board() creates an empty board, with X to play.
@@ -125,15 +125,15 @@ public:
   char winner(char testFor='?') const;
   char virtualWinner(char testFor='?') const;
 
-  cellset verticalCells() const { return this->vert; }
-  cellset horizontalCells() const { return this->horz; }
-  cellset occupiedCells() const { return this->vert | this->horz; }
-  cellset emptyCells() const { return allCells() - occupiedCells(); }
-  static inline constexpr cellset allCells() { return cellset::universe(); }
-  static inline constexpr cellset topRow() { return cellset::top(); }
-  static inline constexpr cellset bottomRow() { return cellset::bottom(); }
-  static inline constexpr cellset leftColumn() { return cellset::left(); }
-  static inline constexpr cellset rightColumn() { return cellset::right(); }
+  cellSet verticalCells() const { return this->vert; }
+  cellSet horizontalCells() const { return this->horz; }
+  cellSet occupiedCells() const { return this->vert | this->horz; }
+  cellSet emptyCells() const { return allCells() - occupiedCells(); }
+  static inline constexpr cellSet allCells() { return cellSet::universe(); }
+  static inline constexpr cellSet topRow() { return cellSet::top(); }
+  static inline constexpr cellSet bottomRow() { return cellSet::bottom(); }
+  static inline constexpr cellSet leftColumn() { return cellSet::left(); }
+  static inline constexpr cellSet rightColumn() { return cellSet::right(); }
 
   std::string stateString() const;
   std::string reverseStateString() const;
@@ -171,11 +171,11 @@ public:
 private:
   bool verticalHasWon() const;
   bool horizontalHasWon() const;
-  static bool isConnected(CellSet<N> start, CellSet<N> owned, CellSet<N> stop);
+  static bool isConnected(cellset<N> start, cellset<N> owned, cellset<N> stop);
   bool verticalHasVirtualConnection() const;
   bool horizontalHasVirtualConnection() const;
   static bool isVirtuallyConnected(
-      CellSet<N> start, CellSet<N> owned, CellSet<N> stop, CellSet<N> vacant);
+      cellset<N> start, cellset<N> owned, cellset<N> stop, cellset<N> vacant);
 
   static_assert (N >= 1 && N <= 13, "Board size must be in 1..13");
 };
@@ -200,8 +200,8 @@ std::ostream& operator<< (std::ostream &w, const Board<N> &board) {
 
 template<bitpos N>
 Board<N>::Board(std::string content) {
-  vert = cellset{0};
-  horz = cellset{0};
+  vert = cellSet{0};
+  horz = cellSet{0};
   content.erase(
     std::remove_if(content.begin(), content.end(), 
       [](char ch) { return std::isspace<char>(ch, std::locale::classic()); }),
