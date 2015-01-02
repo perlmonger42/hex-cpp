@@ -140,10 +140,10 @@ public:
 
   // MappedRender writes to w a textual representation of a game board,
   // including column and row labels. The map argument associates chars with
-  // bitsets, and a cell is rendered by the char corresponding to the bitset that
-  // contains it, or '-' if the cell is not in any of the bitsets. The indent
-  // argument is printed before each line of output, and is nominally a string
-  // of whitespace.
+  // bitsets, and a cell is rendered by the char corresponding to the bitset
+  // that contains it, or '-' if the cell is not in any of the bitsets. The
+  // indent argument is printed before each line of output, and is nominally a
+  // string of whitespace.
   //
   //      a b c d
   //    1: - - O -
@@ -160,7 +160,8 @@ public:
     //show['X'] = this->vert;
     //show['O'] = this->horz;
     //return this->MappedRender(w, indent, show);
-    return this->MappedRender(w, indent, {{'X', this->vert}, {'O', this->horz}});
+    return this->MappedRender(w, indent,
+        {{'X', this->vert}, {'O', this->horz}});
   }
 
   // Equivalent to IndentedRender with an ‹indent› of "".
