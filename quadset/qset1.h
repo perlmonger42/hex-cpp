@@ -61,6 +61,12 @@ public:
     return qSet{bit_mask(0, BITS-1)};
   }
 
+  // Clear any set bits in the unused part of the storage.  This method exists
+  // for use as needed after fast_lsh(), fast_lsh_assign(), and/or fast_not().
+  inline constexpr qSet clean() {
+    return qSet{ b0 & bit_mask(0, BITS-1) };
+  }
+
   constexpr bitpos size() { return BITS; }
 
   // inline constexpr qset<BITS,1>() : b0(0) { }
@@ -118,6 +124,13 @@ public:
     }
   }
 
+  inline constexpr qSet fast_lsh(bitpos n) const {
+    switch (n >> 6) {
+      case  0: return qSet{(b0 << n)};
+      default: return qSet{0};
+    }
+  }
+
   inline constexpr qSet operator>>(bitpos n) const {
     switch (n >> 6) {
       case  0: return qSet{b0 >> n};
@@ -147,6 +160,10 @@ public:
     return *this ^ universe();
   }
 
+  inline constexpr qSet fast_not () const {
+    return qSet{ ~b0 };
+  }
+
   // MUST NOT IMPLEMENT operator=, or qset won't be POD.
   // inline qSet& operator= (qSet other) {
   //   b0 = other.b0;
@@ -156,6 +173,15 @@ public:
   inline constexpr qSet& operator<<= (bitpos n) {
     switch (n >> 6) {
       case  0: *this = qSet{(b0 << n) & bit_mask(0, BITS-1)}; break;
+      default: *this = qSet{0}; break;
+      //default: throw std::out_of_range("qset.set()");
+    }
+    return *this;
+  }
+
+  inline constexpr qSet& fast_lsh_assign (bitpos n) {
+    switch (n >> 6) {
+      case  0: *this = qSet{(b0 << n)}; break;
       default: *this = qSet{0}; break;
       //default: throw std::out_of_range("qset.set()");
     }

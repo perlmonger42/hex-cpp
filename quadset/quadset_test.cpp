@@ -30,19 +30,33 @@ void expect_eq_set(
   }
 }
 
+enum speed_tradeoff {
+  ACCURATE,
+  FAST
+};
+
 template<bitpos BITS>
 void expect_op_result(
     std::string op,
     std::bitset<BITS> bits,
     quadset<BITS> q1,
     quadset<BITS> q2,
-    quadset<BITS> quad
+    quadset<BITS> quad,
+    speed_tradeoff tradeoff = ACCURATE
 ) {
   for (bitpos i = 0; i < BITS; ++i) {
     if (bits.test(i) != quad.test(i)) {
       EXPECT_EQ(false, true) << q1.to_string() << ' ' << op << ' '
         << q2.to_string() << " = " << quad.to_string()
         << "; expected " << bits;
+    }
+  }
+  if (tradeoff != FAST) {
+    if ((BITS & 0x3F) != 0) {
+      for (bitpos i = BITS; i < ((BITS+63) & ~0x3F); ++i) {
+        EXPECT_EQ(false, quad.test(i)) << "found set bit (#"
+          << i << ") out of set range in " << quad.to_string() << op;
+      }
     }
   }
 }
@@ -203,7 +217,7 @@ int loopCountBits(quadset<BITS> s) {
 }
 
 template<bitpos BITS>
-void testShift(std::string label, quadset<BITS> got, quadset<BITS> base, bitpos shift) {
+void testShift(std::string label, quadset<BITS> got, quadset<BITS> base, bitpos shift, speed_tradeoff tradeoff) {
   for (bitpos i = 0; i < BITS; ++i) {
     if (got.test(i) != base.test(i-shift)) {
       std::cout << label << ": "
@@ -216,10 +230,12 @@ void testShift(std::string label, quadset<BITS> got, quadset<BITS> base, bitpos 
       EXPECT_EQ(base.to_string(), got.to_string()) << label << " " << shift;
     }
   }
-  if ((BITS & 0x3F) != 0) {
-    for (bitpos i = BITS; i < ((BITS+63) & ~0x3F); ++i) {
-      EXPECT_EQ(false, got.test(i)) << "found set bit (#"
-        << i << ") out of set range in " << got.to_string() << "<<" << shift;
+  if (tradeoff != FAST) {
+    if ((BITS & 0x3F) != 0) {
+      for (bitpos i = BITS; i < ((BITS+63) & ~0x3F); ++i) {
+        EXPECT_EQ(false, got.test(i)) << "found set bit (#"
+          << i << ") out of set range in " << got.to_string() << "<<" << shift;
+      }
     }
   }
 }

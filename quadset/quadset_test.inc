@@ -553,15 +553,20 @@ TEST(SET, Shifts) {
     while (distance < SIZE) {
       distance += randS();
 
-      testShift("LeftShift", set << distance, set, distance);
+      testShift("LeftShift", set << distance, set, distance, ACCURATE);
       auto leftcopy = set;
       leftcopy <<= distance;
-      testShift("LeftShiftAssign", leftcopy, set, distance);
+      testShift("LeftShiftAssign", leftcopy, set, distance, ACCURATE);
 
-      testShift("RightShift", set >> distance, set, -distance);
+      testShift("RightShift", set >> distance, set, -distance, ACCURATE);
       auto rightcopy = set;
       rightcopy >>= distance;
-      testShift("RightShiftAssign", rightcopy, set, -distance);
+      testShift("RightShiftAssign", rightcopy, set, -distance, ACCURATE);
+
+      testShift("FastLeftShift", set.fast_lsh(distance), set, distance, FAST);
+      leftcopy = set;
+      leftcopy.fast_lsh_assign(distance);
+      testShift("FastLeftShiftAssign", leftcopy, set, distance, FAST);
 
       //distance += 20;
     }
@@ -592,13 +597,46 @@ TEST(SET, BoolOps) {
   v -= t;
   EXPECT_EQ("{0}", v.to_string());
   
+  // Test that ({MAX}<<1)>>1 == {}
+  v.reset();
+  v.set(SIZE-1);
+  EXPECT_EQ("{}", ((v<<1) >> 1).to_string());
+  v.reset();
+  v.set(SIZE-1);
+  EXPECT_EQ("{}", (v.fast_lsh(1).clean() >> 1).to_string());
 
+  v.reset();
+  v.set(SIZE-1);
+  v <<= 1;
+  v >>= 1;
+  EXPECT_EQ("{}", v.to_string());
+  v.reset();
+  v.set(SIZE-1);
+  v.fast_lsh_assign(1);
+  v = v.clean();
+  v >>= 1;
+  EXPECT_EQ("{}", v.to_string());
+
+  // Test that ~s leaves unused bits in the zero state.
+  s = ~SET::make(0, SIZE-1);
+  t = SET::range(1, SIZE-1);
+  EXPECT_EQ(s, t);
+  s = SET::make(0, SIZE-1).fast_not().clean();
+  EXPECT_EQ(s, t);
+
+  // Test that (~set)>>1 doesn't introduce any new elements.
+  EXPECT_EQ(~SET::range(0, SIZE) >> 1, SET::make());
+  EXPECT_EQ(SET::range(0, SIZE).fast_not().clean() >> 1, SET::make());
+  
   auto samples = getTestSets<SIZE>();
   for (int i = 0; i < samples->quadsets.size(); ++i) {
     auto q1 = samples->quadsets.at(i);
     auto b1 = samples->bitsets.at(i);
-    auto quad = ~q1;
+    auto quad = q1.fast_not();
     auto bits = ~b1;
+    expect_op_result<SIZE>("fast_not", bits, q1, q1, quad, FAST);
+
+    quad = ~q1;
     expect_op_result<SIZE>("~", bits, q1, q1, quad);
 
     for (int j = 0; j < samples->quadsets.size(); ++j) {

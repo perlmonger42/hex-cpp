@@ -62,6 +62,12 @@ public:
     return qSet{uint64_t(~0ULL), bit_mask(0, BITS-65)};
   }
 
+  // Clear any set bits in the unused part of the storage.  This method exists
+  // for use as needed after fast_lsh(), fast_lsh_assign(), and/or fast_not().
+  inline constexpr qSet clean() {
+    return qSet{ b0, b1 & bit_mask(0, BITS-65) };
+  }
+
   constexpr bitpos size() { return BITS; }
   
   // inline constexpr qSet() : b0(0) { }
@@ -132,6 +138,22 @@ public:
     }
   }
 
+  inline constexpr qSet fast_lsh(bitpos n) const {
+    if (n < 0) {
+      throw std::out_of_range("qset.operator<<(): negative shift");
+    } else if (n == 0) {
+      return *this;
+    } else if (n < 64) {
+      return qSet{b0 << n, (b1 << n | b0 >> (64-n))};
+    } else if (n == 64) {
+      return qSet{0, b0};
+    } else if (n < 128) {
+      return qSet{0, (b0 << (n - 64))};
+    } else {
+      return qSet{0};
+    }
+  }
+
   inline constexpr qSet operator>>(bitpos n) const {
     if (n < 0) {
       throw std::out_of_range("qset.operator>>(): negative shift");
@@ -169,6 +191,10 @@ public:
     return *this ^ universe();
   }
 
+  inline constexpr qSet fast_not () const {
+    return qSet{ ~b0, ~b1 };
+  }
+
   // MUST NOT IMPLEMENT operator=, or qset won't be POD.
   // inline qSet& operator= (qSet other) {
   //   b0 = other.b0;
@@ -189,6 +215,26 @@ public:
       b0 = 0;
     } else if (n < 128) {
       b1 = (b0 << (n - 64)) & bit_mask(0, BITS-65);
+      b0 = 0;
+    } else {
+      b0 = b1 = 0;
+    }
+    return *this;
+  }
+
+  inline constexpr qSet& fast_lsh_assign(bitpos n) {
+    if (n < 0) {
+      throw std::out_of_range("qset.operator<<=(): negative shift");
+    } else if (n == 0) {
+      ;
+    } else if (n < 64) {
+      b1 = (b1 << n | b0 >> (64-n));
+      b0 = b0 << n;
+    } else if (n == 64) {
+      b1 = b0;
+      b0 = 0;
+    } else if (n < 128) {
+      b1 = (b0 << (n - 64));
       b0 = 0;
     } else {
       b0 = b1 = 0;
