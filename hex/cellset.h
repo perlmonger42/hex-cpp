@@ -5,10 +5,8 @@
 
 // SIZE is the edge length of the board.
 // BITS is the number of cells on a board of that size.
-// QUADS is the number of 64-bit unsigned integers necessary
-// to represent a set of cells on a board of that size.
-// For example, an 11×11 board has SIZE=11, BITS=121, and QUADS=2.
-template<bitpos SIZE, bitpos BITS = SIZE*SIZE, bitpos QUADS = (BITS+63) / 64>
+// For example, an 11×11 board has SIZE=11 and BITS=121.
+template<bitpos SIZE, bitpos BITS = SIZE*SIZE>
 class cellset : public quadset<SIZE*SIZE> {
 public:
   typedef cellset<SIZE> cellSet;
