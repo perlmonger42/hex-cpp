@@ -34,7 +34,7 @@ public:
     return pSet | make(args...);
   }
 
-  static constexpr qSet make(std::initializer_list<bitpos> list) {
+  static inline constexpr qSet make(std::initializer_list<bitpos> list) {
     qSet result;
     result.reset();
     for (int i : list) {
@@ -49,16 +49,7 @@ public:
     return result;
   }
 
-  //static inline constexpr qSet make(std::initializer_list<bitpos>) {
-  //  qSet result;
-  //  result.clear();
-  //  for (int i : list) {
-  //    result.set(i);
-  //  }
-  //  return result;
-  //}
- 
-  static constexpr qSet universe() {
+  static inline constexpr qSet universe() {
     return qSet{uint64_t(~0ULL), bit_mask(0, BITS-65)};
   }
 
@@ -68,11 +59,11 @@ public:
     return qSet{ b0, b1 & bit_mask(0, BITS-65) };
   }
 
-  constexpr bitpos size() { return BITS; }
+  inline constexpr bitpos size() { return BITS; }
   
-  // inline constexpr qSet() : b0(0) { }
-  // inline constexpr qSet(uint64_t val) : b0(val) { }
-  // inline constexpr qSet(qSet const &other) : b0(other.b0) { }
+  // constexpr qSet() : b0(0) { }
+  // constexpr qSet(uint64_t val) : b0(val) { }
+  // constexpr qSet(qSet const &other) : b0(other.b0) { }
 
   // Return true iff the set is nonempty.
   inline constexpr bool any() const {
@@ -196,7 +187,7 @@ public:
   }
 
   // MUST NOT IMPLEMENT operator=, or qset won't be POD.
-  // inline qSet& operator= (qSet other) {
+  // qSet& operator= (qSet other) {
   //   b0 = other.b0;
   //   b1 = other.b1;
   //   return *this;

@@ -3,39 +3,34 @@
 #include <initializer_list>
 #include "../quadset/quadset.h"
 
-
 template<bitpos S, bitpos BITS = S*S, bitpos QUADWORDS = (BITS+63) / 64>
 class cellset : public quadset<S*S> {
 public:
   typedef cellset<S> cellSet;
   typedef quadset<BITS> quadSet;
-  //static constexpr bitpos size = S; // Edge length. A board is size×size cells.
-  //static constexpr bitpos max = S*S-1; // Cell numbers run from 0 to max.
-  //static constexpr bitpos count = S*S; // The number of cells on an N×N board.
 
-
-  constexpr cellset() { quadSet::reset(); }
-  constexpr cellset(uint64_t val) : quadSet{val} { }
-  constexpr cellset(quadSet val) : quadSet(val) { }
-  // constexpr cellset() : quadSet() { }
-  // constexpr cellset(quadSet const &other) : quadSet(other) { }
-  // constexpr cellset(cellset const &other) : quadSet(other) { }
-  // constexpr cellset(unsigned long long val) : quadSet{val} { }
+  inline constexpr cellset() { quadSet::reset(); }
+  inline constexpr cellset(uint64_t val) : quadSet{val} { }
+  inline constexpr cellset(quadSet val) : quadSet(val) { }
+  // inline constexpr cellset() : quadSet() { }
+  // inline constexpr cellset(quadSet const &other) : quadSet(other) { }
+  // inline constexpr cellset(cellset const &other) : quadSet(other) { }
+  // inline constexpr cellset(unsigned long long val) : quadSet{val} { }
   
-  static constexpr cellSet make() {
+  static inline constexpr cellSet make() {
     return cellSet{ quadSet::make() };
   }
 
   template<typename... Args>
-  static constexpr cellSet make(bitpos p, Args... args) {
+  static inline constexpr cellSet make(bitpos p, Args... args) {
     return cellSet{ quadSet::make(p, args...) };
   }
 
-  static cellSet make(std::initializer_list<bitpos> list) {
+  static inline cellSet make(std::initializer_list<bitpos> list) {
     return cellSet{ quadSet::make(list) };
   }
 
-  static constexpr cellSet range(bitpos m, bitpos n) {
+  static inline constexpr cellSet range(bitpos m, bitpos n) {
     return cellSet{ quadSet::range(m, n) };
   }
 
@@ -47,7 +42,7 @@ public:
     return cellSet{ quadSet::clean() };
   }
 
-  constexpr bitpos size() { return BITS; }
+  inline constexpr bitpos size() { return BITS; }
 
   inline constexpr bool any() const {
     return this->quadSet::any();
@@ -172,16 +167,6 @@ public:
     return *this;
   }
 
-  //inline cellSet& clear() {
-  //  this->quadSet::reset();
-  //  return *this;
-  //}
-
-  //inline cellSet& clear(bitpos n) {
-  //  this->quadSet::reset(n);
-  //  return *this;
-  //}
-
   inline cellSet& reset() {
     this->quadSet::reset();
     return *this;
@@ -222,7 +207,7 @@ public:
     return *this;
   }
 
-  
+
 
   static inline constexpr cellSet top() {
     return cellSet{ uint64_t(-1LL) >> (64-S) };
@@ -240,7 +225,7 @@ public:
     return cellSet{ quadSet::repeat_block(quadSet{1<<(S-1)}, S, S) };
   }
 
-  inline constexpr cellSet neighbors() const {
+  constexpr cellSet neighbors() const {
     constexpr auto l = ~left();
     constexpr auto r = ~right();
     auto s = *this;
@@ -251,7 +236,7 @@ public:
            );
   }
 
-  inline constexpr cellSet fast_neighbors() const {
+  constexpr cellSet fast_neighbors() const {
     constexpr auto l = left().fast_not();
     constexpr auto r = right().fast_not();
     auto s = *this;
@@ -277,4 +262,3 @@ template<bitpos S>
 std::ostream& operator<< (std::ostream &out, cellset<S> set) {
   return set.emit(out);
 }
-

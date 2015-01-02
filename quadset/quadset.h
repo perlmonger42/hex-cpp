@@ -66,7 +66,7 @@ typedef int_fast16_t bitpos;
 // inclusive.  Note that is is a different convention from most other
 // interfaces dealing with ranges, because it INCLUDES m.
 // Requires 0 ≤ m ≤ n < 64.
-inline constexpr uint64_t bit_mask(int m, int n) {
+constexpr uint64_t bit_mask(int m, int n) {
   //static_assert(0 <= m, "bit_mask(m,n) requires 0 <= m");
   //static_assert(m <= n, "bit_mask(m,n) requires m <= n");
   //static_assert(n < 64, "bit_mask(m,n) requires n < 64");
@@ -122,32 +122,32 @@ public:
   typedef quadset<BITS> quadSet;
   typedef qset<BITS>    qSet;
 
-  constexpr quadset() { qSet::reset(); }
-  constexpr quadset(uint64_t val) : qSet{val} { }
-  constexpr quadset(qSet val) : qSet(val) { }
+  inline constexpr quadset() { qSet::reset(); }
+  inline constexpr quadset(uint64_t val) : qSet{val} { }
+  inline constexpr quadset(qSet val) : qSet(val) { }
 
-  static constexpr quadSet from_ullong(uint64_t val) {
+  static inline constexpr quadSet from_ullong(uint64_t val) {
     return quadSet{ qSet::from_ullong(val) };
   }
 
-  static constexpr quadSet make() {
+  static inline constexpr quadSet make() {
     return quadSet{ qSet::make() };
   }
 
   template<typename... Args>
-  static constexpr quadSet make(bitpos p, Args... args) {
+  static inline constexpr quadSet make(bitpos p, Args... args) {
     return quadSet{ qSet::make(p, args...) };
   }
 
-  static quadSet make(std::initializer_list<bitpos> list) {
+  static inline quadSet make(std::initializer_list<bitpos> list) {
     return quadSet{ qSet::make(list) };
   }
 
-  static constexpr quadSet range(bitpos m, bitpos n) {
+  static inline constexpr quadSet range(bitpos m, bitpos n) {
     return quadSet{ qSet::range(m, n) };
   }
 
-  static inline constexpr quadSet repeat_block(
+  static constexpr quadSet repeat_block(
     quadSet block,
     bitpos  blockSize,
     bitpos  count,
@@ -157,7 +157,7 @@ public:
       repeat_block(block, blockSize, count-1, (accumulator<<blockSize) | block);
   }
 
-  static constexpr quadSet universe() {
+  static inline constexpr quadSet universe() {
     return quadSet{ qSet::universe() };
   }
 
@@ -165,137 +165,137 @@ public:
     return quadSet{ qSet::clean() };
   }
 
-  constexpr uint64_t to_ullong() const {
+  inline constexpr uint64_t to_ullong() const {
     return this->qSet::to_ullong();
   }
 
-  constexpr quadSet operator<<(bitpos n) const {
+  inline constexpr quadSet operator<<(bitpos n) const {
     return quadSet{ this->qSet::operator<<(n) };
   }
 
-  constexpr quadSet fast_lsh(bitpos n) const {
+  inline constexpr quadSet fast_lsh(bitpos n) const {
     return quadSet{ this->qSet::fast_lsh(n) };
   }
 
-  constexpr quadSet operator>>(bitpos n) const {
+  inline constexpr quadSet operator>>(bitpos n) const {
     return quadSet{ this->qSet::operator>>(n) };
   }
 
-  constexpr quadSet operator& (quadSet other) const {
+  inline constexpr quadSet operator& (quadSet other) const {
     return quadSet{ this->qSet::operator& (other) };
   }
 
-  constexpr quadSet operator| (quadSet other) const {
+  inline constexpr quadSet operator| (quadSet other) const {
     return quadSet{ this->qSet::operator| (other) };
   }
 
-  constexpr quadSet operator^ (quadSet other) const {
+  inline constexpr quadSet operator^ (quadSet other) const {
     return quadSet{ this->qSet::operator^ (other) };
   }
 
-  constexpr quadSet operator- (quadSet other) const {
+  inline constexpr quadSet operator- (quadSet other) const {
     return quadSet{ this->qSet::operator- (other) };
   }
 
-  constexpr quadSet operator~ () const {
+  inline constexpr quadSet operator~ () const {
     return quadSet{ this->qSet::operator~ () };
   }
 
-  constexpr quadSet fast_not () const {
+  inline constexpr quadSet fast_not () const {
     return quadSet{ this->qSet::fast_not () };
   }
 
-  constexpr quadSet& operator<<= (bitpos n) {
+  inline constexpr quadSet& operator<<= (bitpos n) {
     this->qSet::operator<<=(n);
     return *this;
   }
 
-  constexpr quadSet& fast_lsh_assign (bitpos n) {
+  inline constexpr quadSet& fast_lsh_assign (bitpos n) {
     this->qSet::fast_lsh_assign(n);
     return *this;
   }
 
-  constexpr quadSet& operator>>= (bitpos n) {
+  inline constexpr quadSet& operator>>= (bitpos n) {
     this->qSet::operator>>=(n);
     return *this;
   }
 
-  constexpr quadSet& operator&= (quadSet other) {
+  inline constexpr quadSet& operator&= (quadSet other) {
     this->qSet::operator&= (other);
     return *this;
   }
 
-  constexpr quadSet& operator|= (quadSet other) {
+  inline constexpr quadSet& operator|= (quadSet other) {
     this->qSet::operator|= (other);
     return *this;
   }
 
-  constexpr quadSet& operator^= (quadSet other) {
+  inline constexpr quadSet& operator^= (quadSet other) {
     this->qSet::operator^= (other);
     return *this;
   }
 
-  constexpr quadSet& operator-= (quadSet other) {
+  inline constexpr quadSet& operator-= (quadSet other) {
     this->qSet::operator-= (other);
     return *this;
   }
 
-  constexpr quadSet& set() {
+  inline constexpr quadSet& set() {
     this->qSet::set();
     return *this;
   }
 
-  constexpr quadSet& set(bitpos pos) {
+  inline constexpr quadSet& set(bitpos pos) {
     this->qSet::set(pos);
     return *this;
   }
 
-  constexpr quadSet& set(bitpos m, bitpos n) {
+  inline constexpr quadSet& set(bitpos m, bitpos n) {
     this->qSet::set(m, n);
     return *this;
   }
 
-  constexpr quadSet& set(std::initializer_list<bitpos> list) {
+  inline constexpr quadSet& set(std::initializer_list<bitpos> list) {
     this->qSet::set(list);
     return *this;
   }
 
-  constexpr quadSet& reset() {
+  inline constexpr quadSet& reset() {
     this->qSet::reset();
     return *this;
   }
 
-  constexpr quadSet& reset(bitpos pos) {
+  inline constexpr quadSet& reset(bitpos pos) {
     this->qSet::reset(pos);
     return *this;
   }
 
-  constexpr quadSet& reset(bitpos m, bitpos n) {
+  inline constexpr quadSet& reset(bitpos m, bitpos n) {
     this->qSet::reset(m, n);
     return *this;
   }
 
-  constexpr quadSet& reset(std::initializer_list<bitpos> list) {
+  inline constexpr quadSet& reset(std::initializer_list<bitpos> list) {
     this->qSet::reset(list);
     return *this;
   }
 
-  constexpr quadSet& flip() {
+  inline constexpr quadSet& flip() {
     this->qSet::flip();
     return *this;
   }
 
-  constexpr quadSet& flip(bitpos pos) {
+  inline constexpr quadSet& flip(bitpos pos) {
     this->qSet::flip(pos);
     return *this;
   }
 
-  constexpr quadSet& flip(bitpos m, bitpos n) {
+  inline constexpr quadSet& flip(bitpos m, bitpos n) {
     this->qSet::flip(m, n);
     return *this;
   }
 
-  constexpr quadSet& flip(std::initializer_list<bitpos> list) {
+  inline constexpr quadSet& flip(std::initializer_list<bitpos> list) {
     this->qSet::flip(list);
     return *this;
   }

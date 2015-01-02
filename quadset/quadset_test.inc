@@ -545,7 +545,7 @@ TEST(SET, Shifts) {
 
 
   std::minstd_rand generator;
-  std::uniform_int_distribution<uint32_t> distS(0, SIZE);
+  std::uniform_int_distribution<uint32_t> distS(0, SIZE/2);
   auto randS = std::bind(distS, generator);
 
   for (auto set : getTestSets<SIZE>()->quadsets) {
