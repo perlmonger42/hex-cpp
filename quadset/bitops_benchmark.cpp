@@ -57,6 +57,36 @@ void Benchmark_FfsllLowbit(Benchmark &b) {
   globalSum += localSum;
 }
 
+void Benchmark_LoopCountBits(Benchmark &b) {
+  unsigned long long localSum = 0;
+  for (int i = 0; i < b.N; ++i) {
+    for (int j = 0; j < sizeof(random_u64s)/sizeof(random_u64s[0]); ++j) {
+      localSum += loopCountBits(random_u64s[j]);
+    }
+  }
+  globalSum += localSum;
+}
+
+void Benchmark_CountBits(Benchmark &b) {
+  unsigned long long localSum = 0;
+  for (int i = 0; i < b.N; ++i) {
+    for (int j = 0; j < sizeof(random_u64s)/sizeof(random_u64s[0]); ++j) {
+      localSum += countBits(random_u64s[j]);
+    }
+  }
+  globalSum += localSum;
+}
+
+void Benchmark_Popcount(Benchmark &b) {
+  unsigned long long localSum = 0;
+  for (int i = 0; i < b.N; ++i) {
+    for (int j = 0; j < sizeof(random_u64s)/sizeof(random_u64s[0]); ++j) {
+      localSum += __builtin_popcountll(random_u64s[j]);
+    }
+  }
+  globalSum += localSum;
+}
+
 int main() {
   build_random_quads();
 
@@ -64,5 +94,8 @@ int main() {
   BENCHMARK(Benchmark_IntrinsicLowbit);
   BENCHMARK(Benchmark_FfsllLowbit);
 
+  BENCHMARK(Benchmark_LoopCountBits);
+  BENCHMARK(Benchmark_CountBits);
+  BENCHMARK(Benchmark_Popcount);
   return 0;
 }
