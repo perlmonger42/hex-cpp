@@ -1,3 +1,5 @@
+#ifndef __CELLSET_H__
+#define __CELLSET_H__ 1
 #include <iostream>
 #include <stdint.h>
 #include <initializer_list>
@@ -15,10 +17,6 @@ public:
   inline constexpr cellset() { quadSet::reset(); }
   inline constexpr cellset(uint64_t val) : quadSet{val} { }
   inline constexpr cellset(quadSet val) : quadSet(val) { }
-  // inline constexpr cellset() : quadSet() { }
-  // inline constexpr cellset(quadSet const &other) : quadSet(other) { }
-  // inline constexpr cellset(cellset const &other) : quadSet(other) { }
-  // inline constexpr cellset(unsigned long long val) : quadSet{val} { }
   
   static inline constexpr cellSet make() {
     return cellSet{ quadSet::make() };
@@ -260,3 +258,4 @@ template<bitpos SIZE>
 std::ostream& operator<< (std::ostream &out, cellset<SIZE> set) {
   return set.emit(out);
 }
+#endif /* __CELLSET_H__ */

@@ -65,6 +65,8 @@ public:
   // the left-leaning board shown by board1's state string.
   Board(std::string content);
 
+  Board(const Board &b) : play(b.play), vert(b.vert), horz(b.horz) { }
+
   // Returns the player whose turn it is to move:
   // 'X' if vertical, 'O' if horizontal.
   char player() const { return play; }
@@ -112,7 +114,6 @@ public:
 
     return *this;
   }
-
 
   // winner() returns 'X', 'O', or '?', depending on whether the game has been
   // won or not, and by whom (vertical == 'X', horizontal == 'O').

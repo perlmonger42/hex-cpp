@@ -25,6 +25,11 @@ if (test)
   target_link_libraries(winner_test ${EXTRA_LIBS})
   add_test(NAME winner COMMAND winner_test)
 
+  add_executable (search_test search_test.cpp)
+  add_dependencies(search_test panic quadset)
+  target_link_libraries(search_test ${EXTRA_LIBS})
+  add_test(NAME search COMMAND search_test)
+
   add_executable (winner_benchmark winner_benchmark.cpp)
   add_dependencies(winner_benchmark panic quadset)
   target_link_libraries(winner_benchmark ${EXTRA_LIBS})

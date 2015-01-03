@@ -122,7 +122,7 @@ public:
   typedef quadset<BITS> quadSet;
   typedef qset<BITS>    qSet;
 
-  inline constexpr quadset() { qSet::reset(); }
+  inline constexpr quadset() : qSet{0} { }
   inline constexpr quadset(uint64_t val) : qSet{val} { }
   inline constexpr quadset(qSet val) : qSet(val) { }
 
