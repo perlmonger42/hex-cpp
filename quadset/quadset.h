@@ -160,6 +160,24 @@ public:
     return quadSet{ qSet::clean() };
   }
 
+  inline constexpr bitpos size() { return BITS; }
+
+  inline constexpr bool any() const {
+    return this->qSet::any();
+  }
+
+  inline constexpr bool none() const {
+    return this->qSet::none();
+  }
+
+  inline constexpr bool all() const {
+    return this->qSet::all();
+  }
+
+  inline constexpr bitpos count() const {
+    return this->qSet::count();
+  }
+
   inline constexpr uint64_t to_ullong() const {
     return this->qSet::to_ullong();
   }
