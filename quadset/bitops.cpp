@@ -46,7 +46,7 @@ static hashToBitPos bitPosition = initHashToBitPos();
 //
 // For an explanation of how this works, see “Using de Bruijn Sequences to
 // Index a 1 in a Computer Word” by Leiserson, Prokop, and Randall, MIT, 1998.
-int lowestBitPosition(uint64_t q) {
+int lowestBitPositionDeBruijn(uint64_t q) {
 	if (q == 0) {
 		panic("lowestBitPosition(0) is undefined");
 	}
@@ -61,9 +61,9 @@ int lowestBitPosition(uint64_t q) {
 	return bitPosition.pos[((q&-q)*deBruijn26)>>58];
 }
 
-// highestBitPosition returns the position of the maximum nonzero bit in q.
+// highestBitPosition returns the position of the highest-order 1 bit in q.
 // Panics if q = 0.
-int highestBitPosition(uint64_t q) {
+int highestBitPositionFloodFillAndCount(uint64_t q) {
 	if (q == 0) {
 		panic("highestBitPosition(0) is undefined");
 	}
@@ -76,11 +76,155 @@ int highestBitPosition(uint64_t q) {
 	q |= q >> 8;
 	q |= q >> 16;
 	q |= q >> 32;
-	return countBits(q) - 1;
+	return countBitsCunning(q) - 1;
+}
+
+// ms1b == most sigificant 1 bit
+static unsigned char ms1bTable[256] = {
+ 64, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
+  4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+};
+
+int highestBitPositionDivideAndConquer(uint64_t q) {
+  // From https://chessprogramming.wikispaces.com/BitScan
+  if (q == 0) {
+    panic("highestBitPosition(0) is undefined");
+  }
+  int result = 0;
+  if (q > 0xFFFFFFFF) {
+    q >>= 32;
+    result = 32;
+  }
+  if (q > 0xFFFF) {
+    q >>= 16;
+    result += 16;
+  }
+  if (q > 0xFF) {
+    q >>= 8;
+    result += 8;
+  }
+  return result + ms1bTable[q];
+}
+
+int highestBitPositionBranchlessDivideAndConquer(uint64_t q) {
+  // Based on Divide and Conquer from
+  //   https://chessprogramming.wikispaces.com/BitScan
+  // This is three times slower than the plain Divide and Conquer algorithm.
+  if (q == 0) {
+    panic("highestBitPosition(0) is undefined");
+  }
+  int result = 0;
+  int maybe32 = q > 0xFFFFFFFF ? 32 : 0;
+  q >>= maybe32;
+  result += maybe32;
+  int maybe16 = q > 0xFFFF ? 16 : 0;
+  q >>= maybe16;
+  result += maybe16;
+  int maybe8 = q > 0xFF ? 8 : 0;
+  q >>= maybe8;
+  result += maybe8;
+  return result + ms1bTable[q];
+}
+
+int highestBitPositionExtremeDivideAndConquer(uint64_t q) {
+  // Based on Divide and Conquer from
+  //   https://chessprogramming.wikispaces.com/BitScan
+  // Just slightly faster than the plain Divide and Conquer algorithm.
+  if (q == 0) {
+    panic("highestBitPosition(0) is undefined");
+  }
+  if (q > 0xFFFFFFFF) {
+    if (q > 0xFFFFFFFFFFFF) {
+      if (q > 0xFFFFFFFFFFFFFF) {
+        return 56 + ms1bTable[q >> 56];
+      } else {
+        return 48 + ms1bTable[(q >> 48) & 0xFF];
+      }
+    } else {
+      if (q > 0xFFFFFFFFFF) {
+        return 40 + ms1bTable[(q >> 40) & 0xFF];
+      } else {
+        return 32 + ms1bTable[(q >> 32) & 0xFF];
+      }
+    }
+  } else {
+    if (q > 0xFFFF) {
+      if (q > 0xFFFFFF) {
+        return 24 + ms1bTable[(q >> 24) & 0xFF];
+      } else {
+        return 16 + ms1bTable[(q >> 16) & 0xFF];
+      }
+    } else {
+      if (q > 0xFF) {
+        return 8 + ms1bTable[(q >> 8) & 0xFF];
+      } else {
+        return 0 + ms1bTable[(q >> 0) & 0xFF];
+      }
+    }
+  }
+}
+
+int highestBitPositionDeBruijn(uint64_t q) {
+  // From https://chessprogramming.wikispaces.com/BitScan
+  // authors: Kim Walisch, Mark Dickinson
+  static constexpr const int index64[64] = {
+      0, 47,  1, 56, 48, 27,  2, 60,
+     57, 49, 41, 37, 28, 16,  3, 61,
+     54, 58, 35, 52, 50, 42, 21, 44,
+     38, 32, 29, 23, 17, 11,  4, 62,
+     46, 55, 26, 59, 40, 36, 15, 53,
+     34, 51, 20, 43, 31, 22, 10, 45,
+     25, 39, 14, 33, 19, 30,  9, 24,
+     13, 18,  8, 12,  7,  6,  5, 63
+  };
+   
+  if (q == 0) {
+    panic("highestBitPosition(0) is undefined");
+  }
+  const uint64_t debruijn64 = 0x03f79d71b4cb0a89ULL;
+  q |= q >> 1; 
+  q |= q >> 2;
+  q |= q >> 4;
+  q |= q >> 8;
+  q |= q >> 16;
+  q |= q >> 32;
+  return index64[(q * debruijn64) >> 58];
+}
+
+int highestBitPositionDoubleConversion(uint64_t q) {
+  // From https://chessprogramming.wikispaces.com/BitScan
+   union {
+      double d;
+      struct {
+         unsigned int mantissa_low : 32;
+         unsigned int mantissa_high : 20;
+         unsigned int exponent : 11;
+         unsigned int sign : 1;
+      };
+   } ud;
+  if (q == 0) {
+    panic("highestBitPosition(0) is undefined");
+  }
+  ud.d = (double)(q & ~(q >> 32));  // avoid rounding error
+  return ud.exponent - 1023;
 }
 
 // countBits returns the number of nonzero bits in q.
-int countBits(uint64_t q) {
+int countBitsCunning(uint64_t q) {
 	// See section 8.6 of "Software Optimization Guide for AMD64 Processors."
 
 	// Dividing q into 32 two-bit fields, replace each field with its bit count.
@@ -180,10 +324,10 @@ int countBits(uint64_t q) {
 	//               product >> 56: 0 0 0 0 0 0 0 S
 }
 
-// loopCountBits returns the number of nonzero bits in a uint64_t.
+// countBitsLoop returns the number of nonzero bits in a uint64_t.
 // Benchmarking shows that this is about 10 times slower than the sophisticated
 // countBits implementation above.
-int loopCountBits(uint64_t q) {
+int countBitsLoop(uint64_t q) {
   int count = 0;
 	while (q != 0) {
 		count += int(q & 1);
@@ -206,10 +350,10 @@ static lookupBitsInByte initLookupBitsInByte() {
 
 static lookupBitsInByte byteTable = initLookupBitsInByte();
 
-// byteTableCountBits returns the number of nonzero bits in a uint64_t.
+// countBitsByteTable returns the number of nonzero bits in a uint64_t.
 // Benchmarking shows that this is about twice as slow as the sophisticated
 // countBits implementation above.
-int byteTableCountBits(uint64_t q) {
+int countBitsByteTable(uint64_t q) {
 	return int(byteTable.count[(q>> 0) & 0xFF]) +
 		     int(byteTable.count[(q>> 8) & 0xFF]) +
 		     int(byteTable.count[(q>>16) & 0xFF]) +
@@ -234,10 +378,10 @@ static lookupBitsInWord initLookupBitsInWord() {
 
 static lookupBitsInWord wordTable = initLookupBitsInWord();
 
-// wordTableCountBits returns the number of nonzero bits in a uint64_t.
+// countBitsWordTable returns the number of nonzero bits in a uint64_t.
 // Benchmarking shows that this is slightly faster than the sophisticated
 // countBits implementation above.
-int wordTableCountBits(uint64_t q) {
+int countBitsWordTable(uint64_t q) {
 	return int(wordTable.count[(q >>  0) & 0xFFFF]) +
 		     int(wordTable.count[(q >> 16) & 0xFFFF]) +
 		     int(wordTable.count[(q >> 32) & 0xFFFF]) +
@@ -245,30 +389,30 @@ int wordTableCountBits(uint64_t q) {
 }
 
 // Here are benchmark results for the four different countBits approaches:
-//     Benchmark_wordTableCountBits    1849 ns/op
-//     Benchmark_countBits             2068 ns/op
-//     Benchmark_byteTableCountBits    3833 ns/op
-//     Benchmark_loopCountBits        19737 ns/op
+//     Benchmark_CountBitswordTable    1849 ns/op
+//     Benchmark_CountBitsCunning      2068 ns/op
+//     Benchmark_CountBitsbyteTable    3833 ns/op
+//     Benchmark_CountBitsloop        19737 ns/op
 // These numbers are the average of four runs. An "op" consists of counting the
 // bits in each of the four quadwords of 122 different sets (the testSets[]
 // defined in set_test.go).
 
-int loopHighestBitPosition(uint64_t q) {
+int highestBitPositionLoop(uint64_t q) {
 	uint64_t m = 1ULL << maxbit;
 	for (int pos = maxbit; m != 0; m >>= 1, --pos) {
 		if ((m&q) != 0) {
 			return pos;
 		}
 	}
-	panic("loopHighestBitPosition(0) is undefined");
+	panic("highestBitPositionLoop(0) is undefined");
   return -1;
 }
 
-// floodFillLowestBitPosition returns the position of the maximum nonzero bit
+// lowestBitPositionFloodFill returns the position of the maximum nonzero bit
 // in q.  Panics if q = 0.
-int floodFillLowestBitPosition(uint64_t q) {
+int lowestBitPositionFloodFill(uint64_t q) {
 	if (q == 0) {
-		panic("floodFillLowestBitPosition(0) is undefined");
+		panic("lowestBitPosition(0) is undefined");
 	}
 
 	// Flood-fill 1's to the right, then return 64 minus the bit count.
@@ -282,14 +426,14 @@ int floodFillLowestBitPosition(uint64_t q) {
 	return bpq - countBits(q);
 }
 
-int loopLowestBitPosition(uint64_t q) {
+int lowestBitPositionLoop(uint64_t q) {
 	uint64_t m = 1;
 	for (int pos = 0; m != 0; m <<= 1, ++pos) {
 		if ((m&q) != 0) {
 			return pos;
 		}
 	}
-	panic("loopLowestBitPosition(0) is undefined");
+	panic("lowestBitPosition(0) is undefined");
   return maxbit + 1;
 }
 

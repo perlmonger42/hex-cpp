@@ -52,6 +52,14 @@ public:
     return this->quadSet::all();
   }
 
+  inline constexpr bitpos min() const {
+    return this->quadSet::min();
+  }
+
+  inline constexpr bitpos max() const {
+    return this->quadSet::max();
+  }
+
   inline constexpr bitpos count() const {
     return this->quadSet::count();
   }

@@ -72,6 +72,26 @@ public:
     return this->operator==(universe());
   }
 
+  // Return the minimum element of the set.
+  inline constexpr bitpos min() const {
+    if (b0 != 0) {
+      return lowestBitPosition(b0);
+    } else {
+      panic("qset1.min(): cannot find any element in the empty set");
+      return 64;
+    }
+  }
+
+  // Return the maximum element of the set.
+  inline constexpr bitpos max() const {
+    if (b0 != 0) {
+      return highestBitPosition(b0);
+    } else {
+      panic("qset1.max(): cannot find any element in the empty set");
+      return -1;
+    }
+  }
+
   // Returns the number of elements in the set.
   // Said another way, returns the number of bits that have the value 1.
   inline constexpr bitpos count() const {

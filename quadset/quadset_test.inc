@@ -685,3 +685,30 @@ TEST(SET, BoolOps) {
     }
   }
 };
+
+TEST(SET, MaxMin) {
+  auto samples = getTestSets<SIZE>();
+  for (int i = 0; i < samples->quadsets.size(); ++i) {
+    auto q = samples->quadsets.at(i);
+    for (int i=0; i < SIZE; ++i) {
+      if (q.test(i)) {
+        bitpos got = q.min();
+        EXPECT_EQ(i, got) << "min element of " << q;
+        q.reset(i);
+      }
+    }
+    EXPECT_EQ(false, q.any())
+      << "removed all bits, but set is not empty: " << q;
+
+    q = samples->quadsets.at(i);
+    for (int i=SIZE-1; i >= 0; --i) {
+      if (q.test(i)) {
+        bitpos got = q.max();
+        EXPECT_EQ(i, got) << "max element of " << q;
+        q.reset(i);
+      }
+    }
+    EXPECT_EQ(false, q.any())
+      << "removed all bits, but set is not empty: " << q;
+  }
+};

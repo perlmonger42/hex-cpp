@@ -2,6 +2,7 @@
 #define __QUADSET_H__ 1
 #include <iostream>
 #include <sstream>
+#include "../panic/panic.h"
 
 // The Quadset Type
 // ================
@@ -172,6 +173,14 @@ public:
 
   inline constexpr bool all() const {
     return this->qSet::all();
+  }
+
+  inline constexpr bitpos min() const {
+    return this->qSet::min();
+  }
+
+  inline constexpr bitpos max() const {
+    return this->qSet::max();
   }
 
   inline constexpr bitpos count() const {

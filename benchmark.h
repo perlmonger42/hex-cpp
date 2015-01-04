@@ -171,8 +171,14 @@ struct Benchmark {
       this->runN(n);
     }
     this->result = BenchmarkResult{this->N, this->duration};
-    std::cout << this->Name << "\t" << this->N << "\t" << this->nsPerOp()
-              << " ns/op" << std::endl;
+    auto saveFieldWidth = std::cout.width();
+    std::cout.width(53);
+    std::cout << this->Name << "  ";
+    std::cout.width(10);
+    std::cout << this->N << "  ";
+    std::cout.width(6);
+    std::cout << this->nsPerOp() << " ns/op" << std::endl;
+    std::cout.width(saveFieldWidth);
   }
 };
 

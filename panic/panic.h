@@ -1,3 +1,6 @@
+#ifndef __PANIC_H__
+#define __PANIC_H__ 1
+
 #include <exception>
 #include <string>
 
@@ -10,3 +13,4 @@ struct Panic : std::exception {
   virtual ~Panic() _NOEXCEPT { };
   char const* what() const throw() { return text.c_str(); }
 };
+#endif /* __PANIC_H__ */
