@@ -1,3 +1,5 @@
+#ifndef __HEXBOARD_H__
+#define __HEXBOARD_H__ 1
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -66,6 +68,13 @@ public:
   Board(std::string content);
 
   Board(const Board &b) : play(b.play), vert(b.vert), horz(b.horz) { }
+
+  Board &operator=(const Board &b) {
+    this->play = b.play;
+    this->vert = b.vert;
+    this->horz = b.horz;
+    return *this;
+  }
 
   // Returns the player whose turn it is to move:
   // 'X' if vertical, 'O' if horizontal.
@@ -314,3 +323,4 @@ std::ostream& Board<N>::MappedRender(std::ostream& w, std::string indent, const 
   }
   return w;
 }
+#endif /* __HEXBOARD_H__ */
