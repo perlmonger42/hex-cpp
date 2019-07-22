@@ -10,7 +10,7 @@ CONSTEXPR
 For a function to be constexpr, the following requirements must be met:
 1.  The function must have non-void return type. This requirement is
     trivially met in the case of a constructor.
-2.  The function body canot declare variables or define new types.
+2.  The function body cannot declare variables or define new types.
 3.  The body may only contain declarations, null statements, and a single
     return statement.
 4a. [non-constructor] There must exist argument values such that, after
